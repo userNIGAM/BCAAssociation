@@ -1,4 +1,6 @@
+/* eslint-disable no-unused-vars */
 import { useState } from "react";
+import { motion } from "framer-motion";
 import SectionHeader from "../../components/SectionHeader";
 import ContactSection from "../../components/ContactSection";
 import Logo from "/association.png";
@@ -8,116 +10,69 @@ import MemberModal from "./MemberModal";
 const TeamsPage = () => {
   const [selectedMember, setSelectedMember] = useState(null);
 
-  const handleOpen = (member) => setSelectedMember(member);
-  const handleClose = () => setSelectedMember(null);
-
   return (
     <>
-      <div className="max-w-6xl relative mx-auto text-center bg-white pt-20">
+      <div className="max-w-6xl mx-auto px-4 pt-20">
         <SectionHeader
           title="Meet Our Team"
           subtitle="The leadership behind BCA Association MMC"
         />
 
-        {/* President Section */}
-        <div className="mb-12">
-          {teamData.slice(0, 1).map((team, index) => (
-            <div key={index} className="mb-10">
-              <h2 className="text-3xl font-bold text-blue-900">
-                {team.position}
-              </h2>
-              <div className="flex justify-center gap-6 mt-6">
-                {team.members.map((member, idx) => (
-                  <div
-                    key={idx}
-                    className="text-center cursor-pointer"
-                    onClick={() => handleOpen(member)}
-                  >
-                    <img
-                      src={member.image}
-                      alt={member.name}
-                      className="rounded-full w-40 h-40 object-cover mx-auto"
-                    />
-                    <p className="mt-2 text-lg font-medium text-blue-900">
-                      {member.name}
-                    </p>
-                    <p className="text-md text-gray-600">
-                      {member.designation}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          ))}
-        </div>
+        {teamData.map((team, index) => (
+          <div key={index} className="mb-14">
+            <h2 className="text-2xl md:text-3xl font-bold text-blue-900 text-center">
+              {team.position}
+            </h2>
 
-        {/* Vice Presidents & Secretaries Section */}
-        <div className="mb-12">
-          {teamData.slice(1, 2).map((team, index) => (
-            <div key={index} className="mb-10">
-              <h2 className="text-2xl font-bold text-blue-900">
-                {team.position}
-              </h2>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mt-6">
-                {team.members.map((member, idx) => (
-                  <div
-                    key={idx}
-                    className="text-center cursor-pointer"
-                    onClick={() => handleOpen(member)}
-                  >
+            <div
+              className={`mt-8 grid gap-8 ${
+                index === 0
+                  ? "grid-cols-1 place-items-center"
+                  : "grid-cols-2 md:grid-cols-4"
+              }`}
+            >
+              {team.members.map((member, idx) => (
+                <motion.div
+                  key={idx}
+                  whileHover={{ scale: 1.06 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => setSelectedMember(member)}
+                  className="cursor-pointer group"
+                >
+                  <div className="relative w-40 h-40 mx-auto">
                     <img
                       src={member.image || Logo}
                       alt={member.name}
-                      className="rounded-full w-40 h-40 object-cover mx-auto"
+                      className="w-full h-full object-cover rounded-full border-4 border-white shadow-xl group-hover:shadow-2xl transition"
+                      onError={(e) => (e.target.src = Logo)}
                     />
-                    <p className="mt-2 text-lg font-medium text-blue-900">
-                      {member.name}
-                    </p>
-                    <p className="text-md text-gray-600">
-                      {member.designation}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          ))}
-        </div>
 
-        {/* Executive Members Section */}
-        <div>
-          {teamData.slice(2).map((team, index) => (
-            <div key={index}>
-              <h2 className="text-2xl font-bold text-blue-900 mt-8">
-                {team.position}
-              </h2>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mt-6">
-                {team.members.map((member, idx) => (
-                  <div
-                    key={idx}
-                    className="text-center cursor-pointer"
-                    onClick={() => handleOpen(member)}
-                  >
-                    <img
-                      src={member.image || Logo}
-                      alt={member.name}
-                      className="rounded-full w-40 h-40 object-cover mx-auto"
-                    />
-                    <p className="mt-2 text-lg font-medium text-blue-900">
+                    {/* Glow ring */}
+                    <div className="absolute inset-0 rounded-full border-2 border-blue-500 opacity-0 group-hover:opacity-100 transition duration-300"></div>
+                  </div>
+
+                  <div className="text-center mt-4">
+                    <p className="text-lg font-semibold text-gray-800">
                       {member.name}
                     </p>
-                    <p className="text-md text-gray-600">
+                    <p className="text-sm text-blue-600">
                       {member.designation}
                     </p>
                   </div>
-                ))}
-              </div>
+                </motion.div>
+              ))}
             </div>
-          ))}
-        </div>
+          </div>
+        ))}
       </div>
+
       <ContactSection />
+
       {selectedMember && (
-        <MemberModal member={selectedMember} onClose={handleClose} />
+        <MemberModal
+          member={selectedMember}
+          onClose={() => setSelectedMember(null)}
+        />
       )}
     </>
   );

@@ -9,6 +9,8 @@ import Event from "./components/Event";
 import Contact from "./components/Contact";
 
 import TeamsPage from "./pages/teams/Teams";
+import Events from "./pages/events/Events";
+import EventDetails from "./pages/events/EventDetails";
 
 export default function App() {
   return (
@@ -30,6 +32,8 @@ export default function App() {
 
         {/* Teams Page */}
         <Route path="/teams" element={<TeamsPage />} />
+        <Route path="/events" element={<Events />} />
+        <Route path="/event/:id" element={<EventDetails />} />
       </Routes>
 
       <Footer />
