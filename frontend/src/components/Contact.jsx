@@ -21,7 +21,7 @@ export default function ContactPage() {
   };
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-gray-50 via-white to-gray-100 px-4 py-16">
+    <div className="min-h-80 bg-linear-to-br from-gray-50 via-white to-gray-100 px-4 py-16">
       <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-10 items-center">
 
         {/* Left Info Section */}
@@ -37,7 +37,7 @@ export default function ContactPage() {
 
           <div className="flex items-center gap-3 text-gray-700">
             <Mail className="text-black" />
-            <span className="font-medium">bcaassociationmmc@gmail.com</span>
+            <span className="font-medium text-blue-700">bcaassociationmmc@gmail.com</span>
           </div>
         </motion.div>
 

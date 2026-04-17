@@ -3,6 +3,7 @@ import Hero from './components/Hero'
 import Navbar from './components/Navbar'
 import Event from "./components/Event"
 import Contact from "./components/Contact"
+import Footer from './components/Footer'
 export default function App() {
   return (
     <>
@@ -10,6 +11,9 @@ export default function App() {
       <Hero />
       <Event />
       <Contact />
+
+      {/* Footer */}
+      <Footer />
     </>
     )
 }
