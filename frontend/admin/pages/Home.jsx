@@ -51,7 +51,7 @@ function Home() {
   };
 
   return (
-    <div className="flex min-h-screen">
+    <div className="flex min-h-screen py-6">
       {/* Mobile Menu Button */}
       <button
         onClick={() => setSidebarOpen(true)}
