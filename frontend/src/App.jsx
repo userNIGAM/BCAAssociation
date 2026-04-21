@@ -11,7 +11,10 @@ import Contact from "./components/Contact";
 import TeamsPage from "./pages/teams/Teams";
 import Events from "./pages/events/Events";
 import EventDetails from "./pages/events/EventDetails";
+
+// Admin pages
 import AdminLogin from "../admin/pages/auth/AdminLogin";
+import AdminHome from "../admin/pages/Home";
 
 export default function App() {
   return (
@@ -19,7 +22,7 @@ export default function App() {
       <Navbar />
 
       <Routes>
-        {/* Home Page */}
+        {/* Public Pages */}
         <Route
           path="/"
           element={
@@ -31,11 +34,13 @@ export default function App() {
           }
         />
 
-        {/* Teams Page */}
         <Route path="/teams" element={<TeamsPage />} />
         <Route path="/events" element={<Events />} />
         <Route path="/event/:id" element={<EventDetails />} />
+
+        {/* Admin Routes */}
         <Route path="/secret-admin-login" element={<AdminLogin />} />
+        <Route path="/admin/*" element={<AdminHome />} />
       </Routes>
 
       <Footer />

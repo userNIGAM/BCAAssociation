@@ -2,10 +2,12 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 const AdminLogin = () => {
   const [form, setForm] = useState({ email: "", password: "" });
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     setForm({
@@ -21,7 +23,7 @@ const AdminLogin = () => {
     try {
       const response = await axios.post(
         "http://localhost:5000/api/admin/login",
-        form
+        form,
       );
 
       const { token, admin } = response.data;
@@ -30,13 +32,14 @@ const AdminLogin = () => {
         localStorage.setItem("token", token);
         localStorage.setItem("user", JSON.stringify(admin));
         alert("Login successful");
-        window.location.href = "/register";
+        navigate("/home");
       } else {
         alert("Invalid response from server");
       }
     } catch (error) {
       const errorMessage =
-        error.response?.data?.message || "Something went wrong. Please try again.";
+        error.response?.data?.message ||
+        "Something went wrong. Please try again.";
       alert(errorMessage);
     } finally {
       setLoading(false);
