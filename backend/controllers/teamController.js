@@ -1,40 +1,36 @@
-import {Team} from "../models/Team.js";
-import dotenv from "dotenv";
+import Team from '../models/Team.js';
 
-dotenv.config();
+// @desc    Get all team members (public)
+// @route   GET /api/team
+export const getTeamMembers = async (req, res) => {
+  const members = await Team.find({}).sort({ order: 1, createdAt: -1 });
+  res.json(members);
+};
 
-export const registerTeam = async (req, res) => {
-  const { name, email, bio, designation, address, contact } = req.body;
+// @desc    Create team member (admin)
+// @route   POST /api/team
+export const createTeamMember = async (req, res) => {
+  const { name, email, designation, bio, address, contact, image, social_links, order } = req.body;
+  const member = await Team.create({
+    name, email, designation, bio, address, contact, image, social_links, order
+  });
+  res.status(201).json(member);
+};
 
-  try {
-    // Validation
-    if (!name || !email || !bio || !designation || !address || !contact) {
-      return res.status(400).json({ message: "All fields are required!" });
-    }
+// @desc    Update team member (admin)
+// @route   PUT /api/team/:id
+export const updateTeamMember = async (req, res) => {
+  const member = await Team.findById(req.params.id);
+  if (!member) return res.status(404).json({ message: 'Member not found' });
+  const updated = await Team.findByIdAndUpdate(req.params.id, req.body, { new: true });
+  res.json(updated);
+};
 
-    // Check existing user
-    const existingUser = await Team.findOne({ email });
-    if (existingUser) {
-      return res.status(409).json({ message: "Email already exists!" });
-    }
-
-    // Create new team member
-    const newMember = await Team.create({
-      name,
-      email,
-      bio,
-      designation,
-      address,
-      contact,
-    });
-
-    return res.status(201).json({
-      message: "Team member registered successfully!",
-      data: newMember,
-    });
-
-  } catch (error) {
-    console.error("Error registering team:", error);
-    return res.status(500).json({ message: "Server error" });
-  }
+// @desc    Delete team member (admin)
+// @route   DELETE /api/team/:id
+export const deleteTeamMember = async (req, res) => {
+  const member = await Team.findById(req.params.id);
+  if (!member) return res.status(404).json({ message: 'Member not found' });
+  await member.deleteOne();
+  res.json({ message: 'Member removed' });
 };

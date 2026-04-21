@@ -1,49 +1,45 @@
-import React from "react";
 import { Routes, Route } from "react-router-dom";
-
+import { Toaster } from "react-hot-toast";
+import { AuthProvider } from "./context/AuthContext";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
+import Home from "./pages/public/Home";
+import TeamsPage from "./pages/public/Teams";
+import EventsPage from "./pages/public/Events";
+import EventDetails from "./pages/public/EventDetails";
+import NewsPage from "./pages/public/News";
+import NewsDetails from "./pages/public/NewsDetails";
+import ContactPage from "./pages/public/Contact";
+import AdminLogin from "./pages/admin/Login";
+import AdminDashboard from "./pages/admin/Dashboard";
+import ProtectedRoute from "./routes/ProtectedRoute";
 
-import Hero from "./components/Hero";
-import Event from "./components/Event";
-import Contact from "./components/Contact";
-
-import TeamsPage from "./pages/teams/Teams";
-import Events from "./pages/events/Events";
-import EventDetails from "./pages/events/EventDetails";
-
-// Admin pages
-import AdminLogin from "../admin/pages/auth/AdminLogin";
-import AdminHome from "../admin/pages/Home";
-
-export default function App() {
+function App() {
   return (
-    <>
+    <AuthProvider>
+      <Toaster position="top-right" />
       <Navbar />
-
       <Routes>
-        {/* Public Pages */}
+        <Route path="/" element={<Home />} />
+        <Route path="/teams" element={<TeamsPage />} />
+        <Route path="/events" element={<EventsPage />} />
+        <Route path="/event/:id" element={<EventDetails />} />
+        <Route path="/news" element={<NewsPage />} />
+        <Route path="/news/:id" element={<NewsDetails />} />
+        <Route path="/contact" element={<ContactPage />} />
+        <Route path="/secret-admin-login" element={<AdminLogin />} />
         <Route
-          path="/"
+          path="/admin/dashboard"
           element={
-            <>
-              <Hero />
-              <Event />
-              <Contact />
-            </>
+            <ProtectedRoute>
+              <AdminDashboard />
+            </ProtectedRoute>
           }
         />
-
-        <Route path="/teams" element={<TeamsPage />} />
-        <Route path="/events" element={<Events />} />
-        <Route path="/event/:id" element={<EventDetails />} />
-
-        {/* Admin Routes */}
-        <Route path="/secret-admin-login" element={<AdminLogin />} />
-        <Route path="/admin/*" element={<AdminHome />} />
       </Routes>
-
       <Footer />
-    </>
+    </AuthProvider>
   );
 }
+
+export default App;
