@@ -206,8 +206,8 @@ export default function TeamManager() {
           <tbody>
             {members.map((m) => (
               <tr key={m._id} className="border-t">
-                <td className="p-3">{m.name}</td>
-                <td>{m.designation}</td>
+                <td className="p-3">{m.name || "No Name"}</td>
+                <td>{m.designation || "No Designation"}</td>
                 <td>{m.email}</td>
                 <td className="flex gap-2">
                   <button

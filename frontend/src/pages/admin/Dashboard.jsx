@@ -32,7 +32,7 @@ export default function AdminDashboard() {
   ];
 
   return (
-    <div className="flex min-h-screen">
+    <div className="flex min-h-screen py-10">
       <aside className="w-64 bg-slate-900 text-white p-4">
         <div className="flex items-center gap-2 mb-8">
           <LayoutDashboard size={24} />
