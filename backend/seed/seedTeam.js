@@ -90,7 +90,7 @@ const teamMembers = [
   {
     name: "Utsav Ghimire",
     email: "mmc8@example.com",
-    designation: "Graphics Member",
+    designation: "Graphics Lead",
     bio: "mmc",
     address: "mmc",
     contact: "mmc",
@@ -142,7 +142,7 @@ const teamMembers = [
   {
     name: "Yangsing Limbu",
     email: "mmc13@example.com",
-    designation: "Tech Member",
+    designation: "Tech Lead",
     bio: "mmc",
     address: "mmc",
     contact: "mmc",
