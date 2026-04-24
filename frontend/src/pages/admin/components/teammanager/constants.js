@@ -10,3 +10,13 @@ export const designations = [
   "Graphics Member",
   "Executive Member",
 ];
+
+export const emptyForm = {
+  name: "",
+  email: "",
+  designation: "",
+  bio: "",
+  address: "",
+  contact: "",
+  image: "",
+};
