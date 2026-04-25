@@ -13,6 +13,7 @@ import ContactPage from "./pages/public/Contact";
 import AdminLogin from "./pages/admin/Login";
 import AdminDashboard from "./pages/admin/Dashboard";
 import ProtectedRoute from "./routes/ProtectedRoute";
+import ScrollToTop from "./pages/public/components/ScrollToTop";
 
 function App() {
   return (
