@@ -4,7 +4,7 @@ import { AuthProvider } from "./context/AuthContext";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import Home from "./pages/public/Home";
-import TeamsPage from "./pages/public/Teams";
+import TeamsPage from "./pages/public/teams/Teams";
 import EventsPage from "./pages/public/Events";
 import EventDetails from "./pages/public/EventDetails";
 import NewsPage from "./pages/public/News";
