@@ -12,9 +12,20 @@ import { notFound, errorHandler } from './middleware/errorMiddleware.js';
 dotenv.config();
 connectDb();
 
-const app = express();
+const allowedOrigins = new Set([
+  process.env.CLIENT_URL,
+  "http://localhost:5173"
+]);
+const app = express()
+
 app.use(cors({
-  origin: process.env.CLIENT_URL,
+  origin: (origin, cb) => {
+    if (!origin || allowedOrigins.has(origin)) {
+      cb(null, true);
+    } else {
+      cb(new Error("CORS blocked"));
+    }
+  },
   credentials: true
 }));
 app.use(express.json());
