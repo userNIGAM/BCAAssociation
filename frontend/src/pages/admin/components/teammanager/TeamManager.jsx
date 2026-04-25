@@ -12,7 +12,7 @@ import { emptyForm } from "./constants";
 export default function TeamManager() {
   const [members, setMembers] = useState([]);
   const [loading, setLoading] = useState(true);
-
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState(null);
 
@@ -21,6 +21,18 @@ export default function TeamManager() {
   useEffect(() => {
     fetchMembers();
   }, []);
+
+  useEffect(() => {
+    if (showForm) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "auto";
+    }
+
+    return () => {
+      document.body.style.overflow = "auto";
+    };
+  }, [showForm]);
 
   const fetchMembers = async () => {
     try {
@@ -42,23 +54,40 @@ export default function TeamManager() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    try {
-      if (editing) {
-        await api.put(`/team/${editing}`, form);
+    if (isSubmitting) return; // extra safety
 
+    setIsSubmitting(true);
+
+    try {
+      const formData = new FormData();
+
+      formData.append("name", form.name);
+      formData.append("email", form.email);
+      formData.append("designation", form.designation);
+      formData.append("bio", form.bio);
+      formData.append("address", form.address);
+      formData.append("contact", form.contact);
+      formData.append("order", form.order || 0);
+
+      if (form.image instanceof File) {
+        formData.append("image", form.image);
+      }
+
+      if (editing) {
+        await api.put(`/team/${editing}`, formData);
         toast.success("Member updated");
       } else {
-        await api.post("/team", form);
-
+        await api.post("/team", formData);
         toast.success("Member added");
       }
 
       resetForm();
       setShowForm(false);
-
       fetchMembers();
     } catch (error) {
       toast.error(error.response?.data?.message || "Operation failed");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -79,7 +108,10 @@ export default function TeamManager() {
   const editMember = (member) => {
     setEditing(member._id);
 
-    setForm(member);
+    setForm({
+      ...member,
+      image: member.image || "", // keep URL preview
+    });
 
     setShowForm(true);
   };
@@ -97,9 +129,7 @@ export default function TeamManager() {
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold">
-          Manage Team Members
-        </h2>
+        <h2 className="text-2xl font-bold">Manage Team Members</h2>
 
         <button
           onClick={handleAddNew}
@@ -111,13 +141,26 @@ export default function TeamManager() {
       </div>
 
       {showForm && (
-        <TeamForm
-          form={form}
-          setForm={setForm}
-          editing={editing}
-          onSubmit={handleSubmit}
-          onCancel={() => setShowForm(false)}
-        />
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white w-full max-w-3xl rounded-xl shadow-lg p-6 relative max-h-[90vh] overflow-y-auto">
+            {/* Close button */}
+            <button
+              onClick={() => setShowForm(false)}
+              className="absolute top-3 right-3 text-gray-500 hover:text-black"
+            >
+              ✕
+            </button>
+
+            <TeamForm
+              form={form}
+              setForm={setForm}
+              editing={editing}
+              onSubmit={handleSubmit}
+              onCancel={() => setShowForm(false)}
+              isSubmitting={isSubmitting}
+            />
+          </div>
+        </div>
       )}
 
       <TeamTable

@@ -8,6 +8,7 @@ export default function TeamForm({
   editing,
   onSubmit,
   onCancel,
+  isSubmitting,
 }) {
   return (
     <form
@@ -44,9 +45,7 @@ export default function TeamForm({
 
           <select
             value={form.designation}
-            onChange={(e) =>
-              setForm({ ...form, designation: e.target.value })
-            }
+            onChange={(e) => setForm({ ...form, designation: e.target.value })}
             className="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-green-500 focus:border-green-500 transition"
             required
           >
@@ -99,16 +98,31 @@ export default function TeamForm({
         <button
           type="button"
           onClick={onCancel}
-          className="px-5 py-2.5 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition font-medium"
+          disabled={isSubmitting}
+          className="px-5 py-2.5 border rounded-lg disabled:opacity-50"
         >
           Cancel
         </button>
 
         <button
           type="submit"
-          className="px-5 py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-lg transition font-medium shadow-sm"
+          disabled={isSubmitting}
+          className={`px-5 py-2.5 rounded-lg text-white font-medium shadow-sm transition flex items-center justify-center gap-2 ${
+            isSubmitting
+              ? "bg-green-400 cursor-not-allowed"
+              : "bg-green-600 hover:bg-green-700"
+          }`}
         >
-          {editing ? "Update Member" : "Create Member"}
+          {isSubmitting ? (
+            <>
+              <span className="animate-spin border-2 border-white border-t-transparent rounded-full w-4 h-4"></span>
+              Updating...
+            </>
+          ) : editing ? (
+            "Update Member"
+          ) : (
+            "Create Member"
+          )}
         </button>
       </div>
     </form>
