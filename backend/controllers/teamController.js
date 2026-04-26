@@ -24,6 +24,8 @@ export const createTeamMember = async (req, res) => {
     if (req.file) {
       const result = await uploadToCloudinary(req.file.buffer);
       imageUrl = result.secure_url;
+       console.log("Uploaded to Cloudinary:", result.secure_url);
+
     }
 
     const member = await Team.create({
