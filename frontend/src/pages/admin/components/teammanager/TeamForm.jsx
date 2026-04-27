@@ -72,7 +72,93 @@ export default function TeamForm({
           value={form.address}
           onChange={(e) => setForm({ ...form, address: e.target.value })}
         />
+        <div className="md:col-span-2 border-t pt-5 mt-2">
+          <h4 className="text-md font-semibold text-gray-800 mb-4">
+            Social Media Links
+          </h4>
 
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <FormInput
+              label="Facebook"
+              type="url"
+              placeholder="https://facebook.com/username"
+              value={form.social_links?.facebook || ""}
+              onChange={(e) =>
+                setForm({
+                  ...form,
+                  social_links: {
+                    ...form.social_links,
+                    facebook: e.target.value,
+                  },
+                })
+              }
+            />
+
+            <FormInput
+              label="Instagram"
+              type="url"
+              placeholder="https://instagram.com/username"
+              value={form.social_links?.instagram || ""}
+              onChange={(e) =>
+                setForm({
+                  ...form,
+                  social_links: {
+                    ...form.social_links,
+                    instagram: e.target.value,
+                  },
+                })
+              }
+            />
+
+            <FormInput
+              label="LinkedIn"
+              type="url"
+              placeholder="https://linkedin.com/in/username"
+              value={form.social_links?.linkedin || ""}
+              onChange={(e) =>
+                setForm({
+                  ...form,
+                  social_links: {
+                    ...form.social_links,
+                    linkedin: e.target.value,
+                  },
+                })
+              }
+            />
+
+            <FormInput
+              label="Twitter / X"
+              type="url"
+              placeholder="https://x.com/username"
+              value={form.social_links?.twitter || ""}
+              onChange={(e) =>
+                setForm({
+                  ...form,
+                  social_links: {
+                    ...form.social_links,
+                    twitter: e.target.value,
+                  },
+                })
+              }
+            />
+
+            <FormInput
+              label="GitHub"
+              type="url"
+              placeholder="https://github.com/username"
+              value={form.social_links?.github || ""}
+              onChange={(e) =>
+                setForm({
+                  ...form,
+                  social_links: {
+                    ...form.social_links,
+                    github: e.target.value,
+                  },
+                })
+              }
+            />
+          </div>
+        </div>
         <ImageUpload form={form} setForm={setForm} />
 
         <div className="space-y-1 md:col-span-2">

@@ -1,8 +1,23 @@
 /* eslint-disable no-unused-vars */
-import { X, Mail, Phone, MapPin, Globe } from "lucide-react";
-import { FaInstagram, FaLinkedin } from "react-icons/fa";
+import { X, Mail, Phone, MapPin } from "lucide-react";
+import {
+  FaFacebook,
+  FaInstagram,
+  FaLinkedin,
+  FaTwitter,
+  FaGithub,
+} from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
 import { useEffect } from "react";
+
+// Define all possible social platforms with their icons and key names
+const SOCIAL_PLATFORMS = [
+  { key: "facebook", icon: FaFacebook, label: "Facebook" },
+  { key: "instagram", icon: FaInstagram, label: "Instagram" },
+  { key: "linkedin", icon: FaLinkedin, label: "LinkedIn" },
+  { key: "twitter", icon: FaTwitter, label: "Twitter" },
+  { key: "github", icon: FaGithub, label: "GitHub" },
+];
 
 export default function MemberModal({ member, onClose }) {
   useEffect(() => {
@@ -14,6 +29,11 @@ export default function MemberModal({ member, onClose }) {
       window.removeEventListener("keydown", handleEsc);
     };
   }, [onClose]);
+
+  // Collect only the social links that actually have a value
+  const activeSocialLinks = SOCIAL_PLATFORMS.filter(
+    (platform) => member.social_links?.[platform.key],
+  );
 
   return (
     <AnimatePresence>
@@ -36,6 +56,7 @@ export default function MemberModal({ member, onClose }) {
           >
             <X size={18} />
           </button>
+
           <div className="flex justify-center">
             <img
               src={member.image || "/association.png"}
@@ -43,12 +64,15 @@ export default function MemberModal({ member, onClose }) {
               className="w-32 h-32 rounded-full object-cover border-4 border-blue-600"
             />
           </div>
+
           <div className="text-center mt-4">
             <h2 className="text-2xl font-bold">{member.name}</h2>
             <span className="text-sm text-blue-600">{member.designation}</span>
+
             {member.bio && (
               <p className="text-gray-600 text-sm mt-2">{member.bio}</p>
             )}
+
             <div className="mt-4 space-y-1">
               {member.email && (
                 <div className="flex justify-center gap-2">
@@ -69,19 +93,22 @@ export default function MemberModal({ member, onClose }) {
                 </div>
               )}
             </div>
-            {(member.social_links?.instagram ||
-              member.social_links?.linkedin) && (
+
+            {/* Social Links - Dynamically rendered */}
+            {activeSocialLinks.length > 0 && (
               <div className="flex justify-center gap-4 mt-4">
-                {member.social_links.instagram && (
-                  <a href={member.social_links.instagram} target="_blank">
-                    <FaInstagram />
+                {activeSocialLinks.map(({ key, icon: Icon, label }) => (
+                  <a
+                    key={key}
+                    href={member.social_links[key]}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-gray-600 hover:text-blue-600 transition-colors"
+                    aria-label={label}
+                  >
+                    <Icon size={20} />
                   </a>
-                )}
-                {member.social_links.linkedin && (
-                  <a href={member.social_links.linkedin} target="_blank">
-                    <FaLinkedin />
-                  </a>
-                )}
+                ))}
               </div>
             )}
           </div>

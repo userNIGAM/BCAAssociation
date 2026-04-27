@@ -20,7 +20,8 @@ const teamSchema = mongoose.Schema({
     facebook: String,
     instagram: String,
     linkedin: String,
-    twitter: String
+    twitter: String,
+    github : String
   },
   order: { type: Number, default: 0 } // for sorting
 }, { timestamps: true });
