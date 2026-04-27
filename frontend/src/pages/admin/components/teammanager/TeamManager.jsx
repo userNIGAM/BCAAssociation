@@ -72,6 +72,7 @@ export default function TeamManager() {
       if (form.image instanceof File) {
         formData.append("image", form.image);
       }
+      formData.append("social_links", JSON.stringify(form.social_links));
 
       if (editing) {
         await api.put(`/team/${editing}`, formData);

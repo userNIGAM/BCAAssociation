@@ -16,6 +16,28 @@ const uploadToCloudinary = (fileBuffer) => {
     stream.end(fileBuffer);
   });
 };
+const normalizeSocialLinks = (social_links) => {
+  return {
+    facebook: social_links?.facebook || "",
+    instagram: social_links?.instagram || "",
+    linkedin: social_links?.linkedin || "",
+    twitter: social_links?.twitter || "",
+    github: social_links?.github || "",
+  };
+};
+
+const parseSocialLinks = (raw) => {
+  if (!raw) return undefined;
+  if (typeof raw === 'object') return raw;
+  if (typeof raw === 'string') {
+    try {
+      return JSON.parse(raw);
+    } catch (e) {
+      return undefined;
+    }
+  }
+  return undefined;
+};
 
 export const createTeamMember = async (req, res) => {
   try {
@@ -24,13 +46,15 @@ export const createTeamMember = async (req, res) => {
     if (req.file) {
       const result = await uploadToCloudinary(req.file.buffer);
       imageUrl = result.secure_url;
-       console.log("Uploaded to Cloudinary:", result.secure_url);
+      //  console.log("Uploaded to Cloudinary:", result.secure_url);
 
     }
-
+const rawSocialLinks = parseSocialLinks(req.body.social_links);
     const member = await Team.create({
       ...req.body,
       image: imageUrl,
+      social_links: normalizeSocialLinks(rawSocialLinks),
+
     });
 
     res.status(201).json(member);
@@ -52,10 +76,15 @@ export const updateTeamMember = async (req, res) => {
       const result = await uploadToCloudinary(req.file.buffer);
       imageUrl = result.secure_url;
     }
-
+    const rawSocialLinks = parseSocialLinks(req.body.social_links);
     const updated = await Team.findByIdAndUpdate(
       req.params.id,
-      { ...req.body, image: imageUrl },
+      { ...req.body,
+        image: imageUrl,
+        social_links : rawSocialLinks
+        ?normalizeSocialLinks(rawSocialLinks)
+        :member.social_links || {},
+      },
       { returnDocument: "after" }
     );
 
@@ -68,60 +97,23 @@ export const updateTeamMember = async (req, res) => {
 // @desc    Get all team members (public)
 // @route   GET /api/team
 export const getTeamMembers = async (req, res) => {
-  const members = await Team.find({}).sort({ order: 1, createdAt: -1 });
-  res.json(members);
+  try {
+    const members = await Team.find({}).sort({
+      order: 1,
+      createdAt: -1,
+    });
+
+    const safeMembers = members.map((m) => ({
+      ...m._doc,
+      social_links: normalizeSocialLinks(m.social_links),
+    }));
+
+    res.json(safeMembers);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
 };
 
-// // @desc    Create team member (admin)
-// // @route   POST /api/team
-// export const createTeamMember = async (req, res) => {
-//   const {
-//     name,
-//     email,
-//     designation,
-//     bio,
-//     address,
-//     contact,
-//     image,
-//     social_links,
-//     order,
-//   } = req.body;
-
-//   const member = await Team.create({
-//     name,
-//     email,
-//     designation,
-//     bio,
-//     address,
-//     contact,
-//     image,
-//     social_links,
-//     order,
-//   });
-
-//   res.status(201).json(member);
-// };
-
-// // @desc    Update team member (admin)
-// // @route   PUT /api/team/:id
-// export const updateTeamMember = async (req, res) => {
-//   const member = await Team.findById(req.params.id);
-
-//   if (!member) {
-//     return res.status(404).json({ message: 'Member not found' });
-//   }
-
-//   const updated = await Team.findByIdAndUpdate(
-//     req.params.id,
-//     req.body,
-//     { returnDocument: 'after' }
-//   );
-
-//   res.json(updated);
-// };
-
-// @desc    Delete team member (admin)
-// @route   DELETE /api/team/:id
 export const deleteTeamMember = async (req, res) => {
   const member = await Team.findById(req.params.id);
 
