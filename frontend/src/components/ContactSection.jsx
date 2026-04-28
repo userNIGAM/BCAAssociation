@@ -1,7 +1,8 @@
-"use client";
+/* eslint-disable no-unused-vars */
 import { useState } from "react";
-// import AOS from 'aos';
-// import 'aos/dist/aos.css';
+import { motion } from "framer-motion";
+import { User, Mail, MessageSquare } from "lucide-react";
+
 import SectionHeader from "./SectionHeader";
 import api from "../api/axios";
 
@@ -11,6 +12,7 @@ export default function ContactSection() {
     name: "",
     email: "",
     message: "",
+    website: "", // honeypot field
   });
 
   // Form submission state
@@ -23,140 +25,268 @@ export default function ContactSection() {
   // Handle input changes
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData({
-      ...formData,
+
+    setFormData((prev) => ({
+      ...prev,
       [name]: value,
-    });
+    }));
   };
 
   // Handle form submission
- const handleSubmit = async (e) => {
-  e.preventDefault();
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-  setFormState({
-    isSubmitting: true,
-    isSuccess: false,
-    error: null,
-  });
-
-  try {
-    await api.post("/messages", formData);
-
-    setFormData({
-      name: "",
-      email: "",
-      message: "",
-    });
+    // Honeypot check
+    if (formData.website) {
+      return;
+    }
 
     setFormState({
-      isSubmitting: false,
-      isSuccess: true,
+      isSubmitting: true,
+      isSuccess: false,
       error: null,
     });
 
-    setTimeout(() => {
-      setFormState((prev) => ({
-        ...prev,
+    try {
+      await api.post("/messages", formData);
+
+      setFormData({
+        name: "",
+        email: "",
+        message: "",
+        website: "",
+      });
+
+      setFormState({
+        isSubmitting: false,
+        isSuccess: true,
+        error: null,
+      });
+
+      setTimeout(() => {
+        setFormState((prev) => ({
+          ...prev,
+          isSuccess: false,
+        }));
+      }, 5000);
+    } catch (error) {
+      console.error(error);
+
+      setFormState({
+        isSubmitting: false,
         isSuccess: false,
-      }));
-    }, 5000);
-
-  } catch (error) {
-    console.error(error);
-
-    setFormState({
-      isSubmitting: false,
-      isSuccess: false,
-      error:
-        error.response?.data?.message ||
-        "Something went wrong",
-    });
-  }
-};
+        error: error.response?.data?.message || "Something went wrong",
+      });
+    }
+  };
 
   return (
-    <section id="contact" className="relative py-16 bg-gray-800 ">
-      {/* Background Image */}
-      <div className="absolute inset-0 z-0 bg-white">
-        {/* Background image commented out in original code */}
-      </div>
+    <section id="contact" className="relative py-16 bg-gray-800">
+      {/* Background */}
+      <div className="absolute inset-0 z-0 bg-white"></div>
 
       {/* Content */}
-      <div className="relative z-10 container mx-auto px-4" data-aos="zoom-in">
-        {/* Heading */}
+      <div className="relative z-10 container mx-auto px-4">
         <SectionHeader title="Get in Touch" />
 
-        {/* Flex Container */}
-        <div className="flex flex-col lg:flex-row gap-6 justify-center">
+        <div className="flex justify-center">
           {/* Contact Form */}
-          <div
-            className="lg:w-1/3 bg-transparent text-gray-800 rounded-lg shadow-lg p-6"
-            data-aos="fade-right"
+          <motion.div
+            initial={{ opacity: 0, y: 40 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            viewport={{ once: true }}
+            className="
+              w-full 
+              max-w-2xl
+              bg-white/70
+              backdrop-blur-md
+              border border-white/30
+              shadow-2xl
+              rounded-2xl
+              p-8
+            "
           >
-            <h3 className="text-xl font-bold mb-4 animate-fadeIn">
+            <motion.h3
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              transition={{ delay: 0.2 }}
+              className="text-2xl font-bold mb-6 text-gray-800"
+            >
               Contact Us
-            </h3>
+            </motion.h3>
 
             {/* Success message */}
             {formState.isSuccess && (
-              <div className="mb-4 p-3 bg-green-100 border border-green-400 text-green-700 rounded">
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mb-4 p-3 bg-green-100 border border-green-400 text-green-700 rounded-lg"
+              >
                 Your message has been received. We'll get back to you soon!
-              </div>
+              </motion.div>
             )}
 
             {/* Error message */}
             {formState.error && (
-              <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg"
+              >
                 {formState.error}
-              </div>
+              </motion.div>
             )}
 
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-5">
+              {/* Honeypot Field */}
               <input
                 type="text"
-                name="name"
-                value={formData.name}
+                name="website"
+                value={formData.website}
                 onChange={handleChange}
-                placeholder="Your Name"
-                className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500 text-sm animate-fadeInUp"
-                disabled={formState.isSubmitting}
-                required
+                autoComplete="off"
+                tabIndex="-1"
+                className="hidden"
               />
-              <input
-                type="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                placeholder="Your Email"
-                className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500 text-sm animate-fadeInUp"
-                disabled={formState.isSubmitting}
-                required
-              />
-              <textarea
-                name="message"
-                value={formData.message}
-                onChange={handleChange}
-                rows="3"
-                placeholder="Your Message"
-                className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500 text-sm animate-fadeInUp"
-                disabled={formState.isSubmitting}
-                required
-              ></textarea>
-              <button
+
+              {/* Name */}
+              <motion.div
+                whileFocus={{ scale: 1.01 }}
+                className="
+                  flex items-center gap-3
+                  border border-gray-300/70
+                  rounded-xl
+                  px-4 py-3
+                  bg-white/60
+                  backdrop-blur-sm
+                  transition
+                  focus-within:ring-2
+                  focus-within:ring-yellow-500
+                  focus-within:border-yellow-500
+                "
+              >
+                <User className="text-gray-500" size={20} />
+
+                <input
+                  type="text"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  placeholder="Your Name"
+                  disabled={formState.isSubmitting}
+                  required
+                  className="
+                    w-full
+                    bg-transparent
+                    outline-none
+                    text-sm
+                    text-gray-800
+                    placeholder:text-gray-500
+                  "
+                />
+              </motion.div>
+
+              {/* Email */}
+              <motion.div
+                whileFocus={{ scale: 1.01 }}
+                className="
+                  flex items-center gap-3
+                  border border-gray-300/70
+                  rounded-xl
+                  px-4 py-3
+                  bg-white/60
+                  backdrop-blur-sm
+                  transition
+                  focus-within:ring-2
+                  focus-within:ring-yellow-500
+                  focus-within:border-yellow-500
+                "
+              >
+                <Mail className="text-gray-500" size={20} />
+
+                <input
+                  type="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  placeholder="Your Email"
+                  disabled={formState.isSubmitting}
+                  required
+                  className="
+                    w-full
+                    bg-transparent
+                    outline-none
+                    text-sm
+                    text-gray-800
+                    placeholder:text-gray-500
+                  "
+                />
+              </motion.div>
+
+              {/* Message */}
+              <motion.div
+                whileFocus={{ scale: 1.01 }}
+                className="
+                  flex gap-3
+                  border border-gray-300/70
+                  rounded-xl
+                  px-4 py-3
+                  bg-white/60
+                  backdrop-blur-sm
+                  transition
+                  focus-within:ring-2
+                  focus-within:ring-yellow-500
+                  focus-within:border-yellow-500
+                "
+              >
+                <MessageSquare className="text-gray-500 mt-1" size={20} />
+
+                <textarea
+                  name="message"
+                  value={formData.message}
+                  onChange={handleChange}
+                  rows="5"
+                  placeholder="Your Message"
+                  disabled={formState.isSubmitting}
+                  required
+                  className="
+                    w-full
+                    bg-transparent
+                    outline-none
+                    resize-none
+                    text-sm
+                    text-gray-800
+                    placeholder:text-gray-500
+                  "
+                />
+              </motion.div>
+
+              {/* Button */}
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
                 type="submit"
                 disabled={formState.isSubmitting}
-                className={`w-full bg-blue-900 text-white py-2 rounded-md transition duration-300 text-sm animate-bounceIn ${
-                  formState.isSubmitting
-                    ? "opacity-70 cursor-not-allowed"
-                    : "hover:bg-blue-600"
-                }`}
+                className={`
+                  w-full
+                  bg-blue-900
+                  text-white
+                  py-3
+                  rounded-xl
+                  font-medium
+                  transition
+                  ${
+                    formState.isSubmitting
+                      ? "opacity-70 cursor-not-allowed"
+                      : "hover:bg-blue-700"
+                  }
+                `}
               >
                 {formState.isSubmitting ? "Sending..." : "Send Message"}
-              </button>
+              </motion.button>
             </form>
-          </div>
-
-          {/* Contact Information */}
+          </motion.div>
         </div>
       </div>
     </section>
