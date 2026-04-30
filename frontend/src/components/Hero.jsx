@@ -41,6 +41,34 @@ export default function Hero() {
             className="w-auto max-w-55 xs:max-w-[260px] sm:max-w-[320px] md:max-w-90 lg:max-w-105 xl:max-w-120 h-auto object-contain drop-shadow-xl transition-all duration-500 hover:scale-105"
             loading="eager"
           />
+
+          {/* Scrool down indicatior */}
+          <div className="absolute bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2 flex flex-col items-center z-20">
+            {/* Down Arrow */}
+            <motion.div
+              animate={{ y: [0, 6, 0] }}
+              transition={{
+                duration: 1.2,
+                repeat: Infinity,
+              }}
+              className="mt-2"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="w-5 h-5 text-blue-500"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={2.5}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M19 9l-7 7-7-7"
+                />
+              </svg>
+            </motion.div>
+          </div>
         </motion.div>
       </div>
     </section>
