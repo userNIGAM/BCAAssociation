@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-vars */
-import { motion } from "framer-motion";
+import { motion, useMotionValue, useSpring } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 import heroImg from "/association-hero.png";
 
@@ -20,7 +20,7 @@ export default function Hero() {
       },
       {
         threshold: 0.6, // hero must be at least 60% visible
-      }
+      },
     );
 
     observer.observe(section);
@@ -43,6 +43,37 @@ export default function Hero() {
         behavior: "smooth",
       });
     }
+  };
+  // Magnetic hover effect values
+  const x = useMotionValue(0);
+  const y = useMotionValue(0);
+
+  const smoothX = useSpring(x, {
+    stiffness: 120,
+    damping: 14,
+  });
+
+  const smoothY = useSpring(y, {
+    stiffness: 120,
+    damping: 14,
+  });
+
+  // Mouse movement handler
+  const handleMouseMove = (e) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+
+    const mouseX = e.clientX - rect.left - rect.width / 2;
+    const mouseY = e.clientY - rect.top - rect.height / 2;
+
+    // Small movement amount
+    x.set(mouseX * 0.05);
+    y.set(mouseY * 0.05);
+  };
+
+  // Reset position
+  const handleMouseLeave = () => {
+    x.set(0);
+    y.set(0);
   };
 
   return (
@@ -170,38 +201,57 @@ export default function Hero() {
             </button>
           </div>
         </motion.div>
-
         {/* Right Image */}
         <motion.div
           initial={{ opacity: 0, x: 60 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.8, ease: "easeOut" }}
           className="
-            w-full
-            md:w-1/2
-            flex
-            justify-center
-            items-center
-          "
+    w-full
+    md:w-1/2
+    flex
+    justify-center
+    items-center
+  "
         >
-          <img
+          <motion.img
             src={heroImg}
             alt="BCA Association - Students collaborating and innovating"
             loading="eager"
+            onMouseMove={handleMouseMove}
+            onMouseLeave={handleMouseLeave}
+            style={{
+              x: smoothX,
+              y: smoothY,
+            }}
+            whileHover={{
+              scale: 1.05,
+            }}
+            whileTap={{
+              scale: 0.98,
+            }}
+            transition={{
+              scale: {
+                duration: 0.3,
+              },
+              type: "spring",
+              stiffness: 120,
+              damping: 14,
+            }}
             className="
-              w-full
-              max-w-55
-              sm:max-w-[320px]
-              md:max-w-105
-              lg:max-w-125
-              xl:max-w-145
-              h-auto
-              object-contain
-              drop-shadow-2xl
-              transition-transform
-              duration-500
-              hover:scale-105
-            "
+      w-full
+      max-w-55
+      sm:max-w-[320px]
+      md:max-w-105
+      lg:max-w-125
+      xl:max-w-145
+      h-auto
+      object-contain
+      drop-shadow-2xl
+      cursor-pointer
+      will-change-transform
+      select-none
+    "
           />
         </motion.div>
       </div>
