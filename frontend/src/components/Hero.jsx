@@ -1,28 +1,171 @@
 /* eslint-disable no-unused-vars */
 import { motion } from "framer-motion";
+import { useEffect, useRef, useState } from "react";
 import heroImg from "/association-hero.png";
 
 export default function Hero() {
+  const heroRef = useRef(null);
+
+  // NEW
+  const [isHeroVisible, setIsHeroVisible] = useState(true);
+
+  useEffect(() => {
+    const section = heroRef.current;
+
+    if (!section) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsHeroVisible(entry.isIntersecting);
+      },
+      {
+        threshold: 0.6, // hero must be at least 60% visible
+      }
+    );
+
+    observer.observe(section);
+
+    return () => observer.disconnect();
+  }, []);
+
+  const handleScrollDown = () => {
+    if (heroRef.current) {
+      const scrollToY =
+        heroRef.current.offsetTop + heroRef.current.clientHeight;
+
+      window.scrollTo({
+        top: scrollToY,
+        behavior: "smooth",
+      });
+    } else {
+      window.scrollBy({
+        top: window.innerHeight,
+        behavior: "smooth",
+      });
+    }
+  };
+
   return (
-    <section className="w-full min-h-[85vh] md:min-h-screen flex items-center justify-center overflow-hidden px-4 sm:px-6 md:px-10 lg:px-16 py-8 md:py-12 bg-linear-to-b from-white to-blue-50/30">
-      <div className="max-w-7xl w-full flex flex-col-reverse md:flex-row items-center justify-between gap-8 md:gap-10 lg:gap-12 xl:gap-16">
+    <section
+      ref={heroRef}
+      className="
+        relative
+        w-full
+        min-h-[90svh]
+        md:min-h-screen
+        flex
+        items-center
+        justify-center
+        overflow-hidden
+        px-4
+        sm:px-6
+        md:px-10
+        lg:px-16
+        py-10
+        md:py-16
+        bg-linear-to-br
+        from-white
+        via-blue-50/80
+        to-indigo-50/40
+      "
+    >
+      {/* Background Effects */}
+      <div className="absolute inset-0 -z-10 pointer-events-none">
+        {/* your background divs */}
+      </div>
+
+      <div
+        className="
+          max-w-7xl
+          w-full
+          flex
+          flex-col-reverse
+          md:flex-row
+          items-center
+          justify-between
+          gap-10
+          lg:gap-16
+          relative
+          z-10
+        "
+      >
         {/* Left Content */}
         <motion.div
           initial={{ opacity: 0, x: -60 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.8, ease: "easeOut" }}
-          className="w-full md:w-1/2 text-center md:text-left space-y-4 sm:space-y-5 md:space-y-6"
+          className="
+            w-full
+            md:w-1/2
+            text-center
+            md:text-left
+            space-y-5
+            md:space-y-6
+          "
         >
-          <h1 className="text-3xl xs:text-4xl sm:text-5xl md:text-5xl lg:text-6xl xl:text-7xl font-bold leading-tight text-blue-700 tracking-tight">
+          <h1
+            className="
+              text-4xl
+              sm:text-5xl
+              md:text-6xl
+              xl:text-7xl
+              font-bold
+              leading-tight
+              tracking-tight
+              bg-linear-to-r
+              from-blue-700
+              via-blue-800
+              to-indigo-700
+              bg-clip-text
+              text-transparent
+            "
+          >
             BCA Association
           </h1>
 
-          <p className="text-sm xs:text-base sm:text-lg text-gray-600 max-w-lg mx-auto md:mx-0 leading-relaxed">
+          <p
+            className="
+              text-base
+              sm:text-lg
+              text-gray-700
+              max-w-xl
+              mx-auto
+              md:mx-0
+              leading-relaxed
+            "
+          >
             Empowering students through innovation, learning, and collaboration.
           </p>
 
           <div className="flex justify-center md:justify-start pt-2">
-            <button className="group px-5 py-2.5 sm:px-6 sm:py-3 bg-blue-600 text-white text-sm sm:text-base font-medium rounded-xl hover:bg-blue-700 transition-all duration-300 shadow-md hover:shadow-lg hover:scale-105 active:scale-95 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+            <button
+              type="button"
+              className="
+                group
+                px-6
+                py-3
+                bg-linear-to-r
+                from-blue-600
+                to-indigo-600
+                text-white
+                text-sm
+                sm:text-base
+                font-medium
+                rounded-2xl
+                transition-all
+                duration-300
+                shadow-lg
+                hover:shadow-2xl
+                hover:scale-105
+                hover:from-blue-700
+                hover:to-indigo-700
+                active:scale-95
+                focus:outline-none
+                focus:ring-2
+                focus:ring-blue-500
+                focus:ring-offset-2
+              "
+            >
               Explore More
             </button>
           </div>
@@ -33,29 +176,90 @@ export default function Hero() {
           initial={{ opacity: 0, x: 60 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.8, ease: "easeOut" }}
-          className="w-full md:w-1/2 flex justify-center items-center"
+          className="
+            w-full
+            md:w-1/2
+            flex
+            justify-center
+            items-center
+          "
         >
           <img
             src={heroImg}
             alt="BCA Association - Students collaborating and innovating"
-            className="w-auto max-w-55 xs:max-w-[260px] sm:max-w-[320px] md:max-w-90 lg:max-w-105 xl:max-w-120 h-auto object-contain drop-shadow-xl transition-all duration-500 hover:scale-105"
             loading="eager"
+            className="
+              w-full
+              max-w-55
+              sm:max-w-[320px]
+              md:max-w-105
+              lg:max-w-125
+              xl:max-w-145
+              h-auto
+              object-contain
+              drop-shadow-2xl
+              transition-transform
+              duration-500
+              hover:scale-105
+            "
           />
+        </motion.div>
+      </div>
 
-          {/* Scrool down indicatior */}
-          <div className="absolute bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2 flex flex-col items-center z-20">
-            {/* Down Arrow */}
+      {/* Scroll Down Button */}
+      {isHeroVisible && (
+        <button
+          type="button"
+          onClick={handleScrollDown}
+          aria-label="Scroll down to next section"
+          className="
+            absolute
+            bottom-3
+            md:bottom-6
+            left-1/2
+            -translate-x-1/2
+            z-20
+            group
+            hidden
+            sm:flex
+            items-center
+            justify-center
+            rounded-full
+            focus:outline-none
+            focus:ring-2
+            focus:ring-blue-500
+            focus:ring-offset-2
+          "
+        >
+          <div
+            className="
+              bg-white/40
+              backdrop-blur-md
+              rounded-full
+              p-2
+              transition-all
+              duration-300
+              group-hover:bg-white/60
+              group-hover:scale-110
+            "
+          >
             <motion.div
               animate={{ y: [0, 6, 0] }}
               transition={{
                 duration: 1.2,
                 repeat: Infinity,
+                ease: "easeInOut",
               }}
-              className="mt-2"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                className="w-5 h-5 text-blue-500"
+                className="
+                  w-5
+                  h-5
+                  text-blue-600
+                  group-hover:text-indigo-600
+                  transition-colors
+                "
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -69,8 +273,8 @@ export default function Hero() {
               </svg>
             </motion.div>
           </div>
-        </motion.div>
-      </div>
+        </button>
+      )}
     </section>
   );
 }
