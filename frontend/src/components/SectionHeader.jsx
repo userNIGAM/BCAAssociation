@@ -3,10 +3,18 @@ import { motion } from 'framer-motion';
 
 export default function SectionHeader({ title, subtitle }) {
   return (
-    <div className="text-center my-12">
-      <motion.h2 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-3xl md:text-4xl font-bold text-blue-800">{title}</motion.h2>
-      {subtitle && <p className="mt-2 text-gray-600">{subtitle}</p>}
-      <div className="mt-4 mx-auto w-20 h-1 bg-blue-800 rounded"></div>
-    </div>
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="text-center mb-12"
+    >
+      <h1 className="text-4xl md:text-5xl font-bold bg-linear-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+        {title}
+      </h1>
+      {subtitle && (
+        <p className="text-gray-600 mt-3 text-lg">{subtitle}</p>
+      )}
+      <div className="w-24 h-1 bg-linear-to-r from-blue-600 to-purple-600 mx-auto mt-4 rounded-full" />
+    </motion.div>
   );
 }
