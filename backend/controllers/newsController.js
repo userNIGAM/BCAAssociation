@@ -1,6 +1,7 @@
 import News from '../models/News.js';
 import { sanitizeNewsInput } from '../utils/sanitize.js';
 import { validationResult } from 'express-validator';
+import { uploadToCloudinary } from "../utils/uploadToCloudinary.js";
 
 // @desc    Get published news with pagination
 // @route   GET /api/news
@@ -60,14 +61,41 @@ export const getNewsById = async (req, res, next) => {
 export const createNews = async (req, res, next) => {
   try {
     const errors = validationResult(req);
+
     if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
+      return res.status(400).json({
+        errors: errors.array(),
+      });
     }
 
-    const sanitizedData = sanitizeNewsInput(req.body);
-    const news = await News.create(sanitizedData);
-    
+    let imageUrl = "";
+
+    // uploaded file
+    if (req.file) {
+      const uploaded = await uploadToCloudinary(
+        req.file.buffer,
+        "news"
+      );
+
+      imageUrl = uploaded.secure_url;
+    }
+
+    // external URL fallback
+    else if (req.body.image) {
+      imageUrl = req.body.image;
+    }
+
+    const news = await News.create({
+      title: req.body.title,
+      content: req.body.content,
+      image: imageUrl,
+      isPublished:
+        req.body.isPublished === "true" ||
+        req.body.isPublished === true,
+    });
+
     res.status(201).json(news);
+
   } catch (error) {
     next(error);
   }
@@ -79,23 +107,50 @@ export const createNews = async (req, res, next) => {
 export const updateNews = async (req, res, next) => {
   try {
     const errors = validationResult(req);
+
     if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
+      return res.status(400).json({
+        errors: errors.array(),
+      });
     }
 
     const news = await News.findById(req.params.id);
+
     if (!news) {
-      return res.status(404).json({ message: 'News not found' });
+      return res.status(404).json({
+        message: "News not found",
+      });
     }
 
-    const sanitizedData = sanitizeNewsInput(req.body);
-    const updated = await News.findByIdAndUpdate(
-      req.params.id,
-      sanitizedData,
-      { new: true, runValidators: true }
-    );
+    let imageUrl = news.image;
+
+    // new uploaded image
+    if (req.file) {
+      const uploaded = await uploadToCloudinary(
+        req.file.buffer,
+        "news"
+      );
+
+      imageUrl = uploaded.secure_url;
+    }
+
+    // external image URL
+    else if (req.body.image) {
+      imageUrl = req.body.image;
+    }
+
+    news.title = req.body.title;
+    news.content = req.body.content;
+    news.image = imageUrl;
+
+    news.isPublished =
+      req.body.isPublished === "true" ||
+      req.body.isPublished === true;
+
+    const updated = await news.save();
 
     res.json(updated);
+
   } catch (error) {
     next(error);
   }
@@ -107,17 +162,23 @@ export const updateNews = async (req, res, next) => {
 export const deleteNews = async (req, res, next) => {
   try {
     const news = await News.findById(req.params.id);
+
     if (!news) {
-      return res.status(404).json({ message: 'News not found' });
+      return res.status(404).json({
+        message: "News not found",
+      });
     }
 
     await news.deleteOne();
-    res.json({ message: 'News deleted successfully' });
+
+    res.json({
+      message: "News deleted successfully",
+    });
+
   } catch (error) {
     next(error);
   }
 };
-
 // @desc    Get all news (including unpublished) for admin
 // @route   GET /api/admin/news
 // @access  Private/Admin
