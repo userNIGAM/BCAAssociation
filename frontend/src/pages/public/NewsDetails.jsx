@@ -125,7 +125,13 @@ export default function NewsDetails() {
               <img
                 src={news.image}
                 alt={news.title}
-                className="w-full h-full object-cover"
+                className="
+                  w-full
+                  max-h-[80vh]
+                  object-contain
+                  rounded-2xl
+                  bg-gray-100
+  "
               />
             </div>
           )}
