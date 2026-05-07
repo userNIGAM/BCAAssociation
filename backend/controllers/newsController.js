@@ -47,7 +47,7 @@ export const getNewsById = async (req, res, next) => {
     }
 
     // Increment views asynchronously (don't await to avoid blocking)
-    News.findByIdAndUpdate(req.params.id, { $inc: { views: 1 } }).exec();
+    // News.findByIdAndUpdate(req.params.id, { $inc: { views: 1 } }).exec();
 
     res.json(newsItem);
   } catch (error) {
@@ -55,6 +55,29 @@ export const getNewsById = async (req, res, next) => {
   }
 };
 
+// handles the no of view from a deviece
+export const incrementNewsView = async (req, res, next) => {
+  try {
+    const news = await News.findByIdAndUpdate(
+      req.params.id,
+      { $inc: { views: 1 } },
+      { new: true }
+    );
+
+    if (!news) {
+      return res.status(404).json({
+        message: "News not found",
+      });
+    }
+
+    res.json({
+      views: news.views,
+    });
+
+  } catch (error) {
+    next(error);
+  }
+};
 // @desc    Create news (Admin only)
 // @route   POST /api/admin/news
 // @access  Private/Admin

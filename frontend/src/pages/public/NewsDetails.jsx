@@ -7,7 +7,7 @@ import DOMPurify from "dompurify";
 import api from "../../api/axios";
 
 export default function NewsDetails() {
-  const { id } = useParams();
+  const { id:newsId } = useParams();
   const [news, setNews] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -15,7 +15,7 @@ export default function NewsDetails() {
     const fetchNews = async () => {
       try {
         setLoading(true);
-        const { data } = await api.get(`/news/${id}`);
+        const { data } = await api.get(`/news/${newsId}`);
         setNews(data);
       } catch (error) {
         console.error(error);
@@ -24,7 +24,39 @@ export default function NewsDetails() {
       }
     };
     fetchNews();
-  }, [id]);
+  }, [newsId]);
+
+  useEffect(() => {
+  if (!newsId) return;
+
+  // get viewed news from localStorage
+  const viewedNews =
+    JSON.parse(localStorage.getItem("viewedNews")) || [];
+
+  // already viewed on this device
+  if (viewedNews.includes(newsId)) {
+    return;
+  }
+
+  // increment view
+  const incrementView = async () => {
+    try {
+      await api.patch(`/news/${newsId}/view`);
+
+      // save viewed news locally
+      localStorage.setItem(
+        "viewedNews",
+        JSON.stringify([...viewedNews, newsId])
+      );
+
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  incrementView();
+
+}, [newsId]);
 
   const handleShare = async () => {
     if (navigator.share) {
