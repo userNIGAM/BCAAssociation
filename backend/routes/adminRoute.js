@@ -17,4 +17,11 @@ router.post("/login", adminLogin);
 // 🔒 Protected (ADMIN ONLY)
 router.get("/profile", verifyToken, isAdmin, getAdminProfile);
 
+//me
+router.get("/me", authMiddleware, (req, res) => {
+   res.json({
+      user: req.user
+   });
+});
+
 export default router;

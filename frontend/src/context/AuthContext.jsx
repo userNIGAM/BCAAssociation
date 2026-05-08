@@ -20,20 +20,35 @@ export const AuthProvider = ({ children }) => {
 
   // Load user from localStorage on app start
   useEffect(() => {
-    try {
-      const token = localStorage.getItem("token");
-      const userData = localStorage.getItem("user");
+    const verifyAuth = async () => {
+      try {
+        const token = localStorage.getItem("token");
 
-      if (token && userData) {
-        setUser(JSON.parse(userData));
+        if (!token) {
+          setUser(null);
+          return;
+        }
+
+        const { data } = await api.get("/auth/me", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        setUser(data.user);
+      } catch (error) {
+        console.error("Auth verification failed:", error);
+
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+
+        setUser(null);
+      } finally {
+        setLoading(false);
       }
-    } catch (error) {
-      console.error("Failed to parse user data:", error);
-      localStorage.removeItem("token");
-      localStorage.removeItem("user");
-    } finally {
-      setLoading(false);
-    }
+    };
+
+    verifyAuth();
   }, []);
 
   // Login function
