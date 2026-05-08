@@ -18,14 +18,14 @@ export default function EventManager() {
     isActive: true,
   });
 
-  useEffect(() => {
-    fetchEvents();
-  }, []);
-
   const fetchEvents = async () => {
     const { data } = await api.get("/events");
     setEvents(data);
   };
+
+  useEffect(() => {
+    fetchEvents();
+  }, []);
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {

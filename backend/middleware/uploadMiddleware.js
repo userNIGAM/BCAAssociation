@@ -22,7 +22,23 @@ export const upload = multer({
         if (allowed.includes(file.mimetype)) {
             cb(null, true);
         } else {
-            cb(new Error("Invalid image type"), false);
+            cb(new Error("Invalid image type. Only JPEG, PNG, WebP, GIF, and SVG are allowed"), false);
         }
     },
 });
+
+// Multer error handler middleware
+export const handleUploadError = (err, req, res, next) => {
+    if (err instanceof multer.MulterError) {
+        if (err.code === 'LIMIT_FILE_SIZE') {
+            return res.status(400).json({ message: 'File size exceeds 5MB limit' });
+        }
+        if (err.code === 'LIMIT_FILE_COUNT') {
+            return res.status(400).json({ message: 'Too many files' });
+        }
+    }
+    if (err) {
+        return res.status(400).json({ message: err.message || 'Upload error' });
+    }
+    next();
+};

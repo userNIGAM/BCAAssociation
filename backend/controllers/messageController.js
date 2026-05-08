@@ -4,23 +4,19 @@ import validator from "validator";
 import Message from "../models/Message.js";
 
 // Get all messages
-export const getMessages = async (req, res) => {
+export const getMessages = async (req, res, next) => {
   try {
     const messages = await Message.find({})
       .sort({ createdAt: -1 });
 
     res.json(messages);
   } catch (error) {
-    console.error(error);
-
-    res.status(500).json({
-      message: "Failed to fetch messages",
-    });
+    next(error);
   }
 };
 
 // Create new message
-export const createMessage = async (req, res) => {
+export const createMessage = async (req, res, next) => {
   try {
     let { name, email, message, website } = req.body;
 
@@ -85,16 +81,12 @@ export const createMessage = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error(error);
-
-    res.status(500).json({
-      message: "Internal server error",
-    });
+    next(error);
   }
 };
 
 // Mark message as read
-export const markAsRead = async (req, res) => {
+export const markAsRead = async (req, res, next) => {
   try {
     const message = await Message.findById(req.params.id);
 
@@ -112,16 +104,12 @@ export const markAsRead = async (req, res) => {
       message: "Marked as read",
     });
   } catch (error) {
-    console.error(error);
-
-    res.status(500).json({
-      message: "Internal server error",
-    });
+    next(error);
   }
 };
 
 // Delete message
-export const deleteMessage = async (req, res) => {
+export const deleteMessage = async (req, res, next) => {
   try {
     const message = await Message.findById(req.params.id);
 
@@ -137,10 +125,6 @@ export const deleteMessage = async (req, res) => {
       message: "Message deleted successfully",
     });
   } catch (error) {
-    console.error(error);
-
-    res.status(500).json({
-      message: "Internal server error",
-    });
+    next(error);
   }
 };

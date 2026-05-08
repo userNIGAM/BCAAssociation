@@ -6,16 +6,18 @@ import streamifier from 'streamifier';
 const uploadToCloudinary = (fileBuffer) => {
   return new Promise((resolve, reject) => {
     const stream = cloudinary.uploader.upload_stream(
-      { folder: "team" },
+      { folder: "team", timeout: 60000 },
       (error, result) => {
         if (error) reject(error);
         else resolve(result);
       }
     );
 
-    stream.end(fileBuffer);
+    stream.on('error', reject);
+    streamifier.createReadStream(fileBuffer).pipe(stream);
   });
 };
+
 const normalizeSocialLinks = (social_links) => {
   return {
     facebook: social_links?.facebook || "",
@@ -39,33 +41,38 @@ const parseSocialLinks = (raw) => {
   return undefined;
 };
 
-export const createTeamMember = async (req, res) => {
+export const createTeamMember = async (req, res, next) => {
   try {
     let imageUrl = "";
 
     if (req.file) {
-      const result = await uploadToCloudinary(req.file.buffer);
-      imageUrl = result.secure_url;
-      //  console.log("Uploaded to Cloudinary:", result.secure_url);
-
+      try {
+        const result = await uploadToCloudinary(req.file.buffer);
+        imageUrl = result.secure_url;
+      } catch (uploadError) {
+        return res.status(400).json({ 
+          message: "Image upload failed: " + uploadError.message 
+        });
+      }
     }
-const rawSocialLinks = parseSocialLinks(req.body.social_links);
+
+    const rawSocialLinks = parseSocialLinks(req.body.social_links);
     const member = await Team.create({
       ...req.body,
       image: imageUrl,
       social_links: normalizeSocialLinks(rawSocialLinks),
-
     });
 
     res.status(201).json(member);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    next(error);
   }
 };
 
-export const updateTeamMember = async (req, res) => {
+export const updateTeamMember = async (req, res, next) => {
   try {
     const member = await Team.findById(req.params.id);
+    
     if (!member) {
       return res.status(404).json({ message: 'Member not found' });
     }
@@ -73,30 +80,38 @@ export const updateTeamMember = async (req, res) => {
     let imageUrl = member.image;
 
     if (req.file) {
-      const result = await uploadToCloudinary(req.file.buffer);
-      imageUrl = result.secure_url;
+      try {
+        const result = await uploadToCloudinary(req.file.buffer);
+        imageUrl = result.secure_url;
+      } catch (uploadError) {
+        return res.status(400).json({ 
+          message: "Image upload failed: " + uploadError.message 
+        });
+      }
     }
+
     const rawSocialLinks = parseSocialLinks(req.body.social_links);
     const updated = await Team.findByIdAndUpdate(
       req.params.id,
-      { ...req.body,
+      { 
+        ...req.body,
         image: imageUrl,
-        social_links : rawSocialLinks
-        ?normalizeSocialLinks(rawSocialLinks)
-        :member.social_links || {},
+        social_links: rawSocialLinks
+          ? normalizeSocialLinks(rawSocialLinks)
+          : member.social_links || {},
       },
-      { returnDocument: "after" }
+      { returnDocument: "after", runValidators: true }
     );
 
     res.json(updated);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    next(error);
   }
 };
 
 // @desc    Get all team members (public)
 // @route   GET /api/team
-export const getTeamMembers = async (req, res) => {
+export const getTeamMembers = async (req, res, next) => {
   try {
     const members = await Team.find({}).sort({
       order: 1,
@@ -110,18 +125,22 @@ export const getTeamMembers = async (req, res) => {
 
     res.json(safeMembers);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    next(error);
   }
 };
 
-export const deleteTeamMember = async (req, res) => {
-  const member = await Team.findById(req.params.id);
+export const deleteTeamMember = async (req, res, next) => {
+  try {
+    const member = await Team.findById(req.params.id);
 
-  if (!member) {
-    return res.status(404).json({ message: 'Member not found' });
+    if (!member) {
+      return res.status(404).json({ message: 'Member not found' });
+    }
+
+    await member.deleteOne();
+
+    res.json({ message: 'Member removed' });
+  } catch (error) {
+    next(error);
   }
-
-  await member.deleteOne();
-
-  res.json({ message: 'Member removed' });
 };

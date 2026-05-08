@@ -12,14 +12,21 @@ export default function EventsPage() {
   useEffect(() => {
     const fetchEvents = async () => {
       try {
-        const { data } = await api.get("/events");
-        setEvents(data);
+        const response = await api.get("/events");
+
+        const eventsData = Array.isArray(response.data)
+          ? response.data
+          : response.data.events || [];
+
+        setEvents(eventsData);
       } catch (error) {
         console.error(error);
+        setEvents([]);
       } finally {
         setLoading(false);
       }
     };
+
     fetchEvents();
   }, []);
 

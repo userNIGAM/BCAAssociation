@@ -8,6 +8,7 @@ import {
 } from "../controllers/newsController.js";
 
 import { protect } from "../middleware/authMiddleware.js";
+import { adminOnly } from "../middleware/adminMiddleware.js";
 
 import { upload } from "../middleware/uploadMiddleware.js";
 
@@ -15,28 +16,30 @@ import { validateNews } from "../validators/newsValidator.js";
 
 const router = express.Router();
 
-// GET ALL
-router.get("/", protect, getAllNewsAdmin);
+// GET ALL - Admin only
+router.get("/", protect, adminOnly, getAllNewsAdmin);
 
-// CREATE
+// CREATE - Admin only
 router.post(
   "/",
   protect,
+  adminOnly,
   upload.single("image"),
   validateNews,
   createNews
 );
 
-// UPDATE
+// UPDATE - Admin only
 router.put(
   "/:id",
   protect,
+  adminOnly,
   upload.single("image"),
   validateNews,
   updateNews
 );
 
-// DELETE
-router.delete("/:id", protect, deleteNews);
+// DELETE - Admin only
+router.delete("/:id", protect, adminOnly, deleteNews);
 
 export default router;

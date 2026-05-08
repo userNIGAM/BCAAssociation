@@ -29,13 +29,13 @@ export const AuthProvider = ({ children }) => {
           return;
         }
 
-        const { data } = await api.get("/auth/me", {
+        const { data } = await api.get("/auth/profile", {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         });
 
-        setUser(data.user);
+        setUser(data);
       } catch (error) {
         console.error("Auth verification failed:", error);
 

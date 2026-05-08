@@ -5,13 +5,15 @@ import api from "../../../api/axios";
 
 export default function MessagesViewer() {
   const [messages, setMessages] = useState([]);
-  useEffect(() => {
-    fetchMessages();
-  }, []);
+  
   const fetchMessages = async () => {
     const { data } = await api.get("/messages");
     setMessages(data);
   };
+
+  useEffect(() => {
+    fetchMessages();
+  }, []);
   const handleDelete = async (id) => {
     if (confirm("Delete message?")) {
       await api.delete(`/messages/${id}`);

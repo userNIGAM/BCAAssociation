@@ -95,14 +95,18 @@ export const createNews = async (req, res, next) => {
 
     // uploaded file
     if (req.file) {
-      const uploaded = await uploadToCloudinary(
-        req.file.buffer,
-        "news"
-      );
-
-      imageUrl = uploaded.secure_url;
+      try {
+        const uploaded = await uploadToCloudinary(
+          req.file.buffer,
+          "news"
+        );
+        imageUrl = uploaded.secure_url;
+      } catch (uploadError) {
+        return res.status(400).json({
+          message: "Image upload failed: " + uploadError.message
+        });
+      }
     }
-
     // external URL fallback
     else if (req.body.image) {
       imageUrl = req.body.image;
@@ -149,14 +153,18 @@ export const updateNews = async (req, res, next) => {
 
     // new uploaded image
     if (req.file) {
-      const uploaded = await uploadToCloudinary(
-        req.file.buffer,
-        "news"
-      );
-
-      imageUrl = uploaded.secure_url;
+      try {
+        const uploaded = await uploadToCloudinary(
+          req.file.buffer,
+          "news"
+        );
+        imageUrl = uploaded.secure_url;
+      } catch (uploadError) {
+        return res.status(400).json({
+          message: "Image upload failed: " + uploadError.message
+        });
+      }
     }
-
     // external image URL
     else if (req.body.image) {
       imageUrl = req.body.image;

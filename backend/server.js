@@ -1,6 +1,7 @@
 import express from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
+import helmet from 'helmet';
 import { connectDb } from './config/db.js';
 import authRoutes from './routes/authRoutes.js';
 import teamRoutes from './routes/teamRoutes.js';
@@ -11,6 +12,8 @@ import messageRoutes from './routes/messageRoutes.js';
 import { notFound, errorHandler } from './middleware/errorMiddleware.js';
 
 dotenv.config();
+
+// Connect to database
 connectDb();
 
 const allowedOrigins = new Set([
@@ -19,6 +22,9 @@ const allowedOrigins = new Set([
 ]);
 
 const app = express();
+
+// Security middleware
+app.use(helmet());
 
 app.use(cors({
   origin: (origin, cb) => {
@@ -30,7 +36,9 @@ app.use(cors({
   },
   credentials: true
 }));
+
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 // ========== ROUTES ==========
 app.use('/api/auth', authRoutes);
@@ -44,9 +52,17 @@ app.get('/', (req, res) => {
   res.send('BCA Association API is running...');
 });
 
+// Health check endpoint
+app.get('/health', (req, res) => {
+  res.json({ status: 'ok', message: 'Server is running' });
+});
+
 // Error handling middleware (must be last)
 app.use(notFound);
 app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+  console.log(`Environment: ${process.env.NODE_ENV}`);
+});
