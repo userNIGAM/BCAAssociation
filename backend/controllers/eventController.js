@@ -1,4 +1,9 @@
 import Event from '../models/Event.js';
+import validator from 'validator';
+import { validationResult } from 'express-validator';
+
+// Allowed fields for updates (whitelist to prevent injection)
+const ALLOWED_UPDATE_FIELDS = ['title', 'shortDesc', 'content', 'date', 'time', 'venue', 'banner', 'isActive'];
 
 export const getEvents = async (req, res, next) => {
   try {
@@ -45,30 +50,26 @@ export const getEventById = async (req, res, next) => {
 
 export const createEvent = async (req, res, next) => {
   try {
-    const { title, shortDesc, content, date, time, venue, banner } = req.body;
-
-    // Validation
-    if (!title || !shortDesc || !content || !date) {
-      return res.status(400).json({ 
-        message: 'Title, short description, content, and date are required' 
-      });
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
     }
 
-    if (title.length > 200) {
-      return res.status(400).json({ message: 'Title cannot exceed 200 characters' });
-    }
+    const { title, shortDesc, content, date, time, venue, banner, isActive } = req.body;
 
-    const event = await Event.create({
-      title: title.trim(),
-      shortDesc: shortDesc.trim(),
-      content: content.trim(),
+    // Sanitize string inputs
+    const sanitizedEvent = {
+      title: validator.escape(title.trim()),
+      shortDesc: validator.escape(shortDesc.trim()),
+      content: validator.escape(content.trim()),
       date,
-      time: time ? time.trim() : '',
-      venue: venue ? venue.trim() : '',
+      time: time ? validator.escape(time.trim()) : '',
+      venue: venue ? validator.escape(venue.trim()) : '',
       banner: banner ? banner.trim() : '',
-      isActive: true
-    });
+      isActive: isActive !== undefined ? isActive : true
+    };
 
+    const event = await Event.create(sanitizedEvent);
     res.status(201).json(event);
   } catch (error) {
     next(error);
@@ -77,30 +78,35 @@ export const createEvent = async (req, res, next) => {
 
 export const updateEvent = async (req, res, next) => {
   try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
     const event = await Event.findById(req.params.id);
     
     if (!event) {
       return res.status(404).json({ message: 'Event not found' });
     }
 
-    const { title, shortDesc, content, date, time, venue, banner, isActive } = req.body;
+    // Whitelist allowed fields - prevent NoSQL injection
+    const updateData = {};
+    ALLOWED_UPDATE_FIELDS.forEach(field => {
+      if (req.body[field] !== undefined) {
+        if (typeof req.body[field] === 'string') {
+          updateData[field] = validator.escape(req.body[field].trim());
+        } else {
+          updateData[field] = req.body[field];
+        }
+      }
+    });
 
-    // Validate if provided
-    if (title && title.length > 200) {
-      return res.status(400).json({ message: 'Title cannot exceed 200 characters' });
-    }
+    const updated = await Event.findByIdAndUpdate(
+      req.params.id,
+      updateData,
+      { new: true, runValidators: true }
+    );
 
-    // Update only provided fields
-    if (title) event.title = title.trim();
-    if (shortDesc) event.shortDesc = shortDesc.trim();
-    if (content) event.content = content.trim();
-    if (date) event.date = date;
-    if (time) event.time = time.trim();
-    if (venue) event.venue = venue.trim();
-    if (banner) event.banner = banner.trim();
-    if (isActive !== undefined) event.isActive = isActive;
-
-    const updated = await event.save();
     res.json(updated);
   } catch (error) {
     next(error);
