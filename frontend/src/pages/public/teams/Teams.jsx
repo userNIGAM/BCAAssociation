@@ -14,9 +14,9 @@ export default function TeamsPage() {
   useEffect(() => {
     const fetchMembers = async () => {
       try {
-        const { data } = await api.get("/team");
+        const { data } = await api.get("/team?all=true");
 
-        setMembers(data);
+        setMembers(Array.isArray(data) ? data : data.members || []);
       } catch (error) {
         console.error(error);
       } finally {
