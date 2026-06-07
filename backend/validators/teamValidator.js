@@ -6,6 +6,16 @@ const VALID_DESIGNATIONS = [
   'Graphics Member', 'Executive Member'
 ];
 
+const isValidUrl = (url) => {
+  if (!url) return true; // Optional field
+  try {
+    new URL(url);
+    return true;
+  } catch {
+    return false;
+  }
+};
+
 export const validateTeamMember = [
   body('name')
     .trim()
@@ -50,14 +60,35 @@ export const validateTeamMember = [
     .withMessage('Order must be a number between 0 and 999'),
 
   body('social_links').custom((value) => {
+    if (!value) return true; // Optional
+    
+    let links = value;
+    
+    // Parse if string
     if (typeof value === 'string') {
       try {
-        const parsed = JSON.parse(value);
-        return typeof parsed === 'object';
+        links = JSON.parse(value);
       } catch {
         throw new Error('social_links must be valid JSON');
       }
     }
-    return typeof value === 'object' || !value;
+
+    // Validate that it's an object
+    if (typeof links !== 'object' || Array.isArray(links)) {
+      throw new Error('social_links must be a JSON object');
+    }
+
+    // Validate each URL
+    const validPlatforms = ['facebook', 'instagram', 'linkedin', 'twitter', 'github'];
+    for (const [platform, url] of Object.entries(links)) {
+      if (!validPlatforms.includes(platform)) {
+        throw new Error(`Invalid social platform: ${platform}`);
+      }
+      if (url && !isValidUrl(url)) {
+        throw new Error(`Invalid URL for ${platform}: ${url}`);
+      }
+    }
+
+    return true;
   }),
 ];

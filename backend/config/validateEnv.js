@@ -13,6 +13,15 @@ const requiredEnvVars = [
   'CLIENT_URL'
 ];
 
+const isValidUrl = (url) => {
+  try {
+    new URL(url);
+    return true;
+  } catch {
+    return false;
+  }
+};
+
 export const validateEnvironment = () => {
   const missingVars = requiredEnvVars.filter(varName => !process.env[varName]);
   
@@ -41,5 +50,18 @@ export const validateEnvironment = () => {
     process.exit(1);
   }
 
+  // Validate CORS URL
+  if (!isValidUrl(process.env.CLIENT_URL)) {
+    console.error('❌ CLIENT_URL must be a valid URL (e.g., http://localhost:5173 or https://example.com)');
+    process.exit(1);
+  }
+
+  // Validate MONGO_URI format
+  if (!process.env.MONGO_URI.startsWith('mongodb://') && !process.env.MONGO_URI.startsWith('mongodb+srv://')) {
+    console.error('❌ MONGO_URI must start with mongodb:// or mongodb+srv://');
+    process.exit(1);
+  }
+
   console.log('✓ All environment variables validated successfully');
 };
+
