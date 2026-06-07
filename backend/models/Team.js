@@ -26,6 +26,9 @@ const teamSchema = mongoose.Schema({
   order: { type: Number, default: 0 } // for sorting
 }, { timestamps: true });
 
+// Indexes for faster queries
+teamSchema.index({ order: 1, createdAt: -1 });
+teamSchema.index({ designation: 1 });
 
 teamSchema.pre('save', function () {
   if (this.social_links) {

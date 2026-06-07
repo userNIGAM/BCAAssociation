@@ -8,6 +8,7 @@ const API_URL =
 const api = axios.create({
   baseURL: API_URL,
   withCredentials: true,
+  timeout: 10000, // 10 second timeout
 });
 
 // attach token

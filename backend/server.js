@@ -3,6 +3,7 @@ import dotenv from 'dotenv';
 import cors from 'cors';
 import helmet from 'helmet';
 import { connectDb } from './config/db.js';
+import { validateEnvironment } from './config/validateEnv.js';
 import authRoutes from './routes/authRoutes.js';
 import teamRoutes from './routes/teamRoutes.js';
 import newsRoutes from './routes/newsRoutes.js';           // public news routes
@@ -12,6 +13,9 @@ import messageRoutes from './routes/messageRoutes.js';
 import { notFound, errorHandler } from './middleware/errorMiddleware.js';
 
 dotenv.config();
+
+// Validate environment variables before starting
+validateEnvironment();
 
 // Connect to database
 connectDb();
@@ -37,8 +41,8 @@ app.use(cors({
   credentials: true
 }));
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: '10kb' }));
+app.use(express.urlencoded({ extended: true, limit: '10kb' }));
 
 // ========== ROUTES ==========
 app.use('/api/auth', authRoutes);
@@ -62,7 +66,11 @@ app.use(notFound);
 app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
   console.log(`Environment: ${process.env.NODE_ENV}`);
 });
+
+// Set server timeouts
+server.keepAliveTimeout = 65000;
+server.headersTimeout = 66000;

@@ -8,18 +8,16 @@ import {
 
 import { protect } from '../middleware/authMiddleware.js';
 import { adminOnly } from '../middleware/adminMiddleware.js';
-import {upload} from '../middleware/uploadMiddleware.js';
-
+import { upload } from '../middleware/uploadMiddleware.js';
+import { validateTeamMember } from '../validators/teamValidator.js';
 
 const router = express.Router();
 
 router.get('/', getTeamMembers);
 
-// 👇 add multer here
-router.post('/', protect, adminOnly, upload.single('image'), createTeamMember);
-
-router.put('/:id', protect, adminOnly, upload.single('image'), updateTeamMember);
-
+// Admin routes with validation
+router.post('/', protect, adminOnly, upload.single('image'), validateTeamMember, createTeamMember);
+router.put('/:id', protect, adminOnly, upload.single('image'), validateTeamMember, updateTeamMember);
 router.delete('/:id', protect, adminOnly, deleteTeamMember);
 
 export default router;

@@ -11,7 +11,8 @@ const userSchema = mongoose.Schema({
     required: [true, 'Email is required'],
     unique: true,
     lowercase: true,
-    trim: true
+    trim: true,
+    index: true
   },
   password: { 
     type: String, 
@@ -25,5 +26,8 @@ const userSchema = mongoose.Schema({
     enum: ['admin']
   }
 }, { timestamps: true });
+
+// Index for faster email lookups during auth
+userSchema.index({ email: 1 });
 
 export default mongoose.model('User', userSchema);

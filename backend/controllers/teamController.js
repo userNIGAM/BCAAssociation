@@ -1,6 +1,7 @@
 import Team from '../models/Team.js';
 import cloudinary from '../config/cloudinary.js';
 import streamifier from 'streamifier';
+import { validationResult } from 'express-validator';
 
 // helper: upload buffer to cloudinary
 const uploadToCloudinary = (fileBuffer) => {
@@ -43,6 +44,12 @@ const parseSocialLinks = (raw) => {
 
 export const createTeamMember = async (req, res, next) => {
   try {
+    // Check validation errors
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
     let imageUrl = "";
 
     if (req.file) {
@@ -71,6 +78,12 @@ export const createTeamMember = async (req, res, next) => {
 
 export const updateTeamMember = async (req, res, next) => {
   try {
+    // Check validation errors
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
     const member = await Team.findById(req.params.id);
     
     if (!member) {
@@ -113,17 +126,45 @@ export const updateTeamMember = async (req, res, next) => {
 // @route   GET /api/team
 export const getTeamMembers = async (req, res, next) => {
   try {
-    const members = await Team.find({}).sort({
-      order: 1,
-      createdAt: -1,
-    });
+    const page = parseInt(req.query.page) || 1;
+    const limit = Math.min(parseInt(req.query.limit) || 50, 200); // Max 200
+
+    // For frontend display, allow fetching all but with limit cap
+    if (req.query.all === 'true') {
+      const members = await Team.find({})
+        .sort({ order: 1, createdAt: -1 })
+        .limit(limit);
+      const safeMembers = members.map((m) => ({
+        ...m._doc,
+        social_links: normalizeSocialLinks(m.social_links),
+      }));
+      return res.json(safeMembers);
+    }
+
+    // Normal paginated response
+    const skip = (page - 1) * limit;
+    const [members, total] = await Promise.all([
+      Team.find({})
+        .sort({ order: 1, createdAt: -1 })
+        .skip(skip)
+        .limit(limit),
+      Team.countDocuments({})
+    ]);
 
     const safeMembers = members.map((m) => ({
       ...m._doc,
       social_links: normalizeSocialLinks(m.social_links),
     }));
 
-    res.json(safeMembers);
+    res.json({
+      members: safeMembers,
+      pagination: {
+        page,
+        limit,
+        total,
+        pages: Math.ceil(total / limit)
+      }
+    });
   } catch (error) {
     next(error);
   }

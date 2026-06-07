@@ -1,15 +1,33 @@
 // controllers/messageController.js
 
 import validator from "validator";
+import { validationResult } from 'express-validator';
 import Message from "../models/Message.js";
 
 // Get all messages
 export const getMessages = async (req, res, next) => {
   try {
-    const messages = await Message.find({})
-      .sort({ createdAt: -1 });
+    const page = parseInt(req.query.page) || 1;
+    const limit = Math.min(parseInt(req.query.limit) || 20, 100); // Max 100
+    const skip = (page - 1) * limit;
 
-    res.json(messages);
+    const [messages, total] = await Promise.all([
+      Message.find({})
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit),
+      Message.countDocuments({})
+    ]);
+
+    res.json({
+      messages,
+      pagination: {
+        page,
+        limit,
+        total,
+        pages: Math.ceil(total / limit)
+      }
+    });
   } catch (error) {
     next(error);
   }
@@ -18,49 +36,13 @@ export const getMessages = async (req, res, next) => {
 // Create new message
 export const createMessage = async (req, res, next) => {
   try {
-    let { name, email, message, website } = req.body;
-
-    // Honeypot spam protection
-    if (website) {
-      return res.status(400).json({
-        message: "Spam detected",
-      });
+    // Check validation errors from express-validator middleware
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
     }
 
-    // Trim values
-    name = name?.trim();
-    email = email?.trim();
-    message = message?.trim();
-
-    // Required validation
-    if (!name || !email || !message) {
-      return res.status(400).json({
-        message: "All fields are required",
-      });
-    }
-
-    // Name validation
-    if (name.length < 2 || name.length > 50) {
-      return res.status(400).json({
-        message:
-          "Name must be between 2 and 50 characters",
-      });
-    }
-
-    // Email validation
-    if (!validator.isEmail(email)) {
-      return res.status(400).json({
-        message: "Please enter a valid email address",
-      });
-    }
-
-    // Message validation
-    if (message.length < 10 || message.length > 1000) {
-      return res.status(400).json({
-        message:
-          "Message must be between 10 and 1000 characters",
-      });
-    }
+    const { name, email, message } = req.body;
 
     // Sanitize values
     const cleanName = validator.escape(name);

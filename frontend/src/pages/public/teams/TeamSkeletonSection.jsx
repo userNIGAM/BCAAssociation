@@ -1,5 +1,3 @@
-/* eslint-disable no-unused-vars */
-
 import TeamSkeleton from "./TeamSkeleton";
 
 export default function TeamSkeletonSection() {

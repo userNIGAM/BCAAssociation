@@ -18,14 +18,19 @@ export default function EventManager() {
     isActive: true,
   });
 
-  const fetchEvents = async () => {
+  useEffect(() => {
+    const fetchEvents = async () => {
+      const { data } = await api.get("/events");
+      setEvents(data);
+    };
+    fetchEvents();
+  }, []);
+  
+  const refetchEvents = async () => {
     const { data } = await api.get("/events");
     setEvents(data);
   };
 
-  useEffect(() => {
-    fetchEvents();
-  }, []);
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -44,7 +49,7 @@ export default function EventManager() {
         banner: "",
         isActive: true,
       });
-      fetchEvents();
+      refetchEvents();
     } catch (error) {
       toast.error("Failed",error);
     }
@@ -53,7 +58,7 @@ export default function EventManager() {
     if (confirm("Delete?")) {
       await api.delete(`/events/${id}`);
       toast.success("Deleted");
-      fetchEvents();
+      refetchEvents();
     }
   };
 
