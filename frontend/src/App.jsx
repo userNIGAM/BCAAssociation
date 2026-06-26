@@ -14,6 +14,7 @@ import AdminLogin from "./pages/admin/Login";
 import AdminDashboard from "./pages/admin/Dashboard";
 import ProtectedRoute from "./routes/ProtectedRoute";
 import ScrollToTop from "./pages/public/components/ScrollToTop";
+import ModalQuestion from "./pages/public/model-question/ModalQuestion";
 
 function App() {
   return (
@@ -28,6 +29,9 @@ function App() {
         <Route path="/news" element={<NewsPage />} />
         <Route path="/news/:id" element={<NewsDetails />} />
         <Route path="/contact" element={<ContactPage />} />
+        <Route path="/modal-questions" element={<Home />} />
+        <Route path="/semester/:id" element={<ModalQuestion />} />
+
         <Route path="/secret-admin-login" element={<AdminLogin />} />
         <Route
           path="/admin/dashboard"

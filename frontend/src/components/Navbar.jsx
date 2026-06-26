@@ -10,6 +10,7 @@ const links = [
   { name: 'Events', path: '/events' },
   { name: 'News', path: '/news' },
   { name: 'Contact', path: '/contact' },
+   { name: "Modal Questions", path: "/modal-questions" },
 ];
 
 export default function Navbar() {
