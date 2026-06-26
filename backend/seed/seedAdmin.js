@@ -1,15 +1,16 @@
 import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
 import dotenv from "dotenv";
-import Admin from "../models/Admin.js";
-
+import User from "../models/User.js";
+import dns from 'dns';
 dotenv.config();
+dns.setServers(["8.8.8.8", "1.1.1.1"]);
 
 const seedAdmins = async () => {
   try {
     await mongoose.connect(process.env.MONGO_URI);
 
-    await Admin.deleteMany(); // optional (careful in production)
+    await User.deleteMany(); // optional (careful in production)
 
     const admins = [
       {
@@ -17,14 +18,9 @@ const seedAdmins = async () => {
         email: "admin1@gmail.com",
         password: await bcrypt.hash("password123", 10),
       },
-      {
-        name: "Admin Two",
-        email: "admin2@gmail.com",
-        password: await bcrypt.hash("password123", 10),
-      },
     ];
 
-    await Admin.insertMany(admins);
+    await User.insertMany(admins);
 
     console.log("Admins seeded successfully");
     process.exit();

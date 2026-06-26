@@ -21,7 +21,8 @@ export default function EventManager() {
   useEffect(() => {
     const fetchEvents = async () => {
       const { data } = await api.get("/events");
-      setEvents(data);
+      // console.log(data)
+      setEvents(data.events);
     };
     fetchEvents();
   }, []);

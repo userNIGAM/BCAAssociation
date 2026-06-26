@@ -37,10 +37,11 @@ export default function TeamManager() {
   const fetchMembers = async () => {
     try {
       const { data } = await api.get("/team");
-
-      setMembers(data);
+      // console.log(data)
+      setMembers(data.members);
     } catch (error) {
       toast.error("Failed to load team", error);
+      // console.log(error)
     } finally {
       setLoading(false);
     }

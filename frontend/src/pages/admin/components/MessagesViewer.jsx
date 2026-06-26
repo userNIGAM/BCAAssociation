@@ -9,7 +9,8 @@ export default function MessagesViewer() {
   useEffect(() => {
     const fetchMessages = async () => {
       const { data } = await api.get("/messages");
-      setMessages(data);
+      // console.log(data)
+      setMessages(data.messages);
     };
     fetchMessages();
   }, []);
