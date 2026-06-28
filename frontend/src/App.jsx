@@ -15,6 +15,9 @@ import AdminDashboard from "./pages/admin/Dashboard";
 import ProtectedRoute from "./routes/ProtectedRoute";
 import ScrollToTop from "./pages/public/components/ScrollToTop";
 import ModalQuestion from "./pages/public/model-question/ModalQuestion";
+import SemesterPage from "./pages/public/model-question/SemesterPage";
+import ModalOptions from "./pages/public/model-question/ModalOptions";
+import Entrance from "./pages/public/model-question/Entrance";
 
 function App() {
   return (
@@ -29,8 +32,14 @@ function App() {
         <Route path="/news" element={<NewsPage />} />
         <Route path="/news/:id" element={<NewsDetails />} />
         <Route path="/contact" element={<ContactPage />} />
-        <Route path="/modal-questions" element={<Home />} />
-        <Route path="/semester/:id" element={<ModalQuestion />} />
+        <Route path="/modal-questions" element={<ModalOptions />} />
+
+        <Route path="/entrance" element={<Entrance />} />
+
+        <Route path="/yearly-modal-questions" element={<ModalQuestion />} />
+
+        <Route path="/semester/:id" element={<SemesterPage />} />
+        <Route path="/semester/:id" element={<SemesterPage />} />
 
         <Route path="/secret-admin-login" element={<AdminLogin />} />
         <Route

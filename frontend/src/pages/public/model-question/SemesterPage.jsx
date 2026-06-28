@@ -1,5 +1,6 @@
 import { useParams } from "react-router-dom";
 import { FileText } from "lucide-react";
+import BackButton from "../components/BackButton";
 
 const papers = {
   1: ["2025", "2024", "2023", "2022", "2021"],
@@ -26,7 +27,7 @@ export default function ModalQuestion() {
         <p className="text-gray-500 mt-2 mb-8">
           Previous Year Question Papers
         </p>
-
+          <BackButton />
         <div className="space-y-4">
           {papers[id]?.map((year) => (
             <a

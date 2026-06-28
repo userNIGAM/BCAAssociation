@@ -1,7 +1,6 @@
-// Home.jsx
-
 import { useNavigate } from "react-router-dom";
 import { FileText, ChevronRight } from "lucide-react";
+import BackButton from "../components/BackButton";
 
 const semesters = [
   { id: 1, name: "Semester 1" },
@@ -18,7 +17,7 @@ export default function Home() {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen bg-slate-50 p-6">
+    <div className="min-h-screen bg-slate-50 p-6 mt-10">
       <div className="max-w-5xl mx-auto">
         <h1 className="text-3xl font-bold text-slate-900 mb-2">
           TU BCA Question Papers
@@ -27,7 +26,7 @@ export default function Home() {
         <p className="text-slate-500 mb-8">
           Previous Year Question Papers (Semester 1 - 8)
         </p>
-
+          <BackButton />
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {semesters.map((semester) => (
             <button
