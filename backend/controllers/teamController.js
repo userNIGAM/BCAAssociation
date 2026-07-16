@@ -1,7 +1,7 @@
 import Team from '../models/Team.js';
 import cloudinary from '../config/cloudinary.js';
 import streamifier from 'streamifier';
-import { validationResult } from 'express-validator';
+import asyncHandler from '../utils/asyncHandler.js';
 
 // helper: upload buffer to cloudinary
 const uploadToCloudinary = (fileBuffer) => {
@@ -42,146 +42,116 @@ const parseSocialLinks = (raw) => {
   return undefined;
 };
 
-export const createTeamMember = async (req, res, next) => {
-  try {
-    // Check validation errors
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
+export const createTeamMember = asyncHandler(async (req, res) => {
+  let imageUrl = "";
+
+  if (req.file) {
+    try {
+      const result = await uploadToCloudinary(req.file.buffer);
+      imageUrl = result.secure_url;
+    } catch (uploadError) {
+      return res.status(400).json({
+        message: "Image upload failed: " + uploadError.message
+      });
     }
+  }
 
-    let imageUrl = "";
+  const rawSocialLinks = parseSocialLinks(req.body.social_links);
+  const member = await Team.create({
+    ...req.body,
+    image: imageUrl,
+    social_links: normalizeSocialLinks(rawSocialLinks),
+  });
 
-    if (req.file) {
-      try {
-        const result = await uploadToCloudinary(req.file.buffer);
-        imageUrl = result.secure_url;
-      } catch (uploadError) {
-        return res.status(400).json({ 
-          message: "Image upload failed: " + uploadError.message 
-        });
-      }
+  res.status(201).json(member);
+});
+
+export const updateTeamMember = asyncHandler(async (req, res) => {
+  const member = await Team.findById(req.params.id);
+
+  if (!member) {
+    return res.status(404).json({ message: 'Member not found' });
+  }
+
+  let imageUrl = member.image;
+
+  if (req.file) {
+    try {
+      const result = await uploadToCloudinary(req.file.buffer);
+      imageUrl = result.secure_url;
+    } catch (uploadError) {
+      return res.status(400).json({
+        message: "Image upload failed: " + uploadError.message
+      });
     }
+  }
 
-    const rawSocialLinks = parseSocialLinks(req.body.social_links);
-    const member = await Team.create({
+  const rawSocialLinks = parseSocialLinks(req.body.social_links);
+  const updated = await Team.findByIdAndUpdate(
+    req.params.id,
+    {
       ...req.body,
       image: imageUrl,
-      social_links: normalizeSocialLinks(rawSocialLinks),
-    });
+      social_links: rawSocialLinks
+        ? normalizeSocialLinks(rawSocialLinks)
+        : member.social_links || {},
+    },
+    { returnDocument: "after", runValidators: true }
+  );
 
-    res.status(201).json(member);
-  } catch (error) {
-    next(error);
-  }
-};
-
-export const updateTeamMember = async (req, res, next) => {
-  try {
-    // Check validation errors
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
-
-    const member = await Team.findById(req.params.id);
-    
-    if (!member) {
-      return res.status(404).json({ message: 'Member not found' });
-    }
-
-    let imageUrl = member.image;
-
-    if (req.file) {
-      try {
-        const result = await uploadToCloudinary(req.file.buffer);
-        imageUrl = result.secure_url;
-      } catch (uploadError) {
-        return res.status(400).json({ 
-          message: "Image upload failed: " + uploadError.message 
-        });
-      }
-    }
-
-    const rawSocialLinks = parseSocialLinks(req.body.social_links);
-    const updated = await Team.findByIdAndUpdate(
-      req.params.id,
-      { 
-        ...req.body,
-        image: imageUrl,
-        social_links: rawSocialLinks
-          ? normalizeSocialLinks(rawSocialLinks)
-          : member.social_links || {},
-      },
-      { returnDocument: "after", runValidators: true }
-    );
-
-    res.json(updated);
-  } catch (error) {
-    next(error);
-  }
-};
+  res.json(updated);
+});
 
 // @desc    Get all team members (public)
 // @route   GET /api/team
-export const getTeamMembers = async (req, res, next) => {
-  try {
-    const page = parseInt(req.query.page) || 1;
-    const limit = Math.min(parseInt(req.query.limit) || 50, 200); // Max 200
+export const getTeamMembers = asyncHandler(async (req, res) => {
+  const page = parseInt(req.query.page) || 1;
+  const limit = Math.min(parseInt(req.query.limit) || 50, 200); // Max 200
 
-    // For frontend display, allow fetching all but with limit cap
-    if (req.query.all === 'true') {
-      const members = await Team.find({})
-        .sort({ order: 1, createdAt: -1 })
-        .limit(limit);
-      const safeMembers = members.map((m) => ({
-        ...m._doc,
-        social_links: normalizeSocialLinks(m.social_links),
-      }));
-      return res.json(safeMembers);
-    }
-
-    // Normal paginated response
-    const skip = (page - 1) * limit;
-    const [members, total] = await Promise.all([
-      Team.find({})
-        .sort({ order: 1, createdAt: -1 })
-        .skip(skip)
-        .limit(limit),
-      Team.countDocuments({})
-    ]);
-
+  if (req.query.all === 'true') {
+    const members = await Team.find({})
+      .sort({ order: 1, createdAt: -1 })
+      .limit(limit);
     const safeMembers = members.map((m) => ({
       ...m._doc,
       social_links: normalizeSocialLinks(m.social_links),
     }));
-
-    res.json({
-      members: safeMembers,
-      pagination: {
-        page,
-        limit,
-        total,
-        pages: Math.ceil(total / limit)
-      }
-    });
-  } catch (error) {
-    next(error);
+    return res.json(safeMembers);
   }
-};
 
-export const deleteTeamMember = async (req, res, next) => {
-  try {
-    const member = await Team.findById(req.params.id);
+  const skip = (page - 1) * limit;
+  const [members, total] = await Promise.all([
+    Team.find({})
+      .sort({ order: 1, createdAt: -1 })
+      .skip(skip)
+      .limit(limit),
+    Team.countDocuments({})
+  ]);
 
-    if (!member) {
-      return res.status(404).json({ message: 'Member not found' });
+  const safeMembers = members.map((m) => ({
+    ...m._doc,
+    social_links: normalizeSocialLinks(m.social_links),
+  }));
+
+  res.json({
+    members: safeMembers,
+    pagination: {
+      page,
+      limit,
+      total,
+      pages: Math.ceil(total / limit)
     }
+  });
+});
 
-    await member.deleteOne();
+export const deleteTeamMember = asyncHandler(async (req, res) => {
+  const member = await Team.findById(req.params.id);
 
-    res.json({ message: 'Member removed' });
-  } catch (error) {
-    next(error);
+  if (!member) {
+    return res.status(404).json({ message: 'Member not found' });
   }
-};
+
+  await member.deleteOne();
+
+  res.json({ message: 'Member removed' });
+});

@@ -39,7 +39,6 @@ function App() {
         <Route path="/yearly-modal-questions" element={<ModalQuestion />} />
 
         <Route path="/semester/:id" element={<SemesterPage />} />
-        <Route path="/semester/:id" element={<SemesterPage />} />
 
         <Route path="/secret-admin-login" element={<AdminLogin />} />
         <Route

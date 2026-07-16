@@ -13,6 +13,7 @@ import { adminOnly } from "../middleware/adminMiddleware.js";
 import { upload } from "../middleware/uploadMiddleware.js";
 
 import { validateNews } from "../validators/newsValidator.js";
+import { handleValidationErrors } from "../middleware/handleValidationErrors.js";
 
 const router = express.Router();
 
@@ -26,6 +27,7 @@ router.post(
   adminOnly,
   upload.single("image"),
   validateNews,
+  handleValidationErrors,
   createNews
 );
 
@@ -36,6 +38,7 @@ router.put(
   adminOnly,
   upload.single("image"),
   validateNews,
+  handleValidationErrors,
   updateNews
 );
 
