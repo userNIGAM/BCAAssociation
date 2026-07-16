@@ -13,6 +13,16 @@ import { validateTeamMember } from '../validators/teamValidator.js';
 
 const router = express.Router();
 
+router.get("/:id", (req, res) => {
+  res.json({
+    success: true,
+    id: req.params.id
+  });
+});
+router.put("/:id", (req, res, next) => {
+  console.log("PUT route reached");
+  next();
+}),
 router.get('/', getTeamMembers);
 
 // Admin routes with validation

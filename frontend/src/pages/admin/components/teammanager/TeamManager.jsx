@@ -87,6 +87,10 @@ export default function TeamManager() {
       setShowForm(false);
       fetchMembers();
     } catch (error) {
+      console.log("STATUS:", error.response?.status);
+      console.log("DATA:", error.response?.data);
+      console.log("HEADERS:", error.response?.headers);
+      console.log(JSON.stringify(error.response.data.errors, null, 2));
       toast.error(error.response?.data?.message || "Operation failed");
     } finally {
       setIsSubmitting(false);
