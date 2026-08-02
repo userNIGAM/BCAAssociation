@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 import { X, Mail, Phone, MapPin } from "lucide-react";
 import {
   FaFacebook,
@@ -73,40 +72,52 @@ export default function MemberModal({ member, onClose }) {
               <p className="text-gray-600 text-sm mt-2">{member.bio}</p>
             )}
 
-            <div className="mt-4 space-y-1">
+            <div className="mt-6 space-y-3">
               {member.email && (
-                <div className="flex justify-center gap-2">
-                  <Mail size={16} />
-                  <a href={`mailto:${member.email}`}>{member.email}</a>
+                <div className="flex items-center justify-center gap-3 text-gray-700">
+                  <Mail className="w-4 h-4 shrink-0" />
+                  <a
+                    href={`mailto:${member.email}`}
+                    className="hover:text-blue-600 break-all"
+                  >
+                    {member.email}
+                  </a>
                 </div>
               )}
+
               {member.contact && (
-                <div className="flex justify-center gap-2">
-                  <Phone size={16} />
-                  <a href={`tel:${member.contact}`}>{member.contact}</a>
+                <div className="flex items-center justify-center gap-3 text-gray-700">
+                  <Phone className="w-4 h-4 shrink-0" />
+                  <a
+                    href={`tel:${member.contact}`}
+                    className="hover:text-blue-600"
+                  >
+                    {member.contact}
+                  </a>
                 </div>
               )}
+
               {member.address && (
-                <div className="flex justify-center gap-2">
-                  <MapPin size={16} />
-                  <span>{member.address}</span>
+                <div className="flex items-center justify-center gap-3 text-gray-700">
+                  <MapPin className="w-4 h-4 shrink-0" />
+                  <span className="text-center">{member.address}</span>
                 </div>
               )}
             </div>
 
             {/* Social Links - Dynamically rendered */}
             {activeSocialLinks.length > 0 && (
-              <div className="flex justify-center gap-4 mt-4">
+              <div className="flex justify-center items-center gap-5 mt-6">
                 {activeSocialLinks.map(({ key, icon: Icon, label }) => (
                   <a
                     key={key}
                     href={member.social_links[key]}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-gray-600 hover:text-blue-600 transition-colors"
                     aria-label={label}
+                    className="text-gray-500 hover:text-blue-600 transition-all duration-200 hover:scale-110"
                   >
-                    <Icon size={20} />
+                    <Icon size={24} />
                   </a>
                 ))}
               </div>
